@@ -30,9 +30,13 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   pcl::toPCLPointCloud2(cloud_, dummy);
   sensor_msgs::PointCloud2 output;
   pcl_conversions::fromPCL(dummy, output);
+  // should be:
+  // output.header = disparity->header;
+  // does not work on the rosbag with the tf broadcaster for the camera position
   output.header.stamp = ros::Time::now();
   // output.header.frame_id = "/world";
-  output.header.frame_id = "/map";
+  // output.header.frame_id = "/map";
+  output.header.frame_id = "/camera_optical_frame";
   p_cloud_pub_.publish(output);
   // clear points and cloud
   cloud_.points.clear();

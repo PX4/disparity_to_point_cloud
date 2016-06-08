@@ -13,6 +13,6 @@ if __name__ == '__main__':
         br.sendTransform((0.0, 0.0, 1.0),
                          ( -0.70710678118654, 0.0,0.0, 0.70710678118654),
                          rospy.Time.now(),
-                         "map",
+                         "camera_optical_frame",
                          "world")
         rate.sleep()
