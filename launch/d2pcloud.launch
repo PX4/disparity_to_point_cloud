@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="disparity_to_point_cloud" type="disparity_to_point_cloud_node" name="disparity_to_point_cloud" output="screen">
+    <remap to="/cam1_image" from="/disparity"/>
+    <remap to="/omi_cam/point_cloud" from="/point_cloud"/>
+  </node>
+  <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node>
+</launch>
