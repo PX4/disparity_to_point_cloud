@@ -127,7 +127,9 @@ include_directories(
 add_library(disparity_to_point_cloud
   src/disparity_to_point_cloud.cpp
 )
-
+target_link_libraries(disparity_to_point_cloud
+  ${PCL_LIBRARIES}
+)
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
