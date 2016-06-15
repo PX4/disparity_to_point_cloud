@@ -1,0 +1,3 @@
+<launch>
+  <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node>
+</launch>

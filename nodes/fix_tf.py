@@ -10,9 +10,9 @@ if __name__ == '__main__':
     br = tf.TransformBroadcaster()
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
-        br.sendTransform((0.0, 0.0, 1.0),
-                         ( -0.70710678118654, 0.0,0.0, 0.70710678118654),
+        br.sendTransform((0.0, 0.0, 0.0),
+                         ( 0.0, 1.0,0.0, 0.0),
                          rospy.Time.now(),
                          "camera_optical_frame",
-                         "world")
+                         "vicon/test/test")
         rate.sleep()
