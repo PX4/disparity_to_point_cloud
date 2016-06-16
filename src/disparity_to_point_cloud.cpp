@@ -13,7 +13,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
     pf = disparity->image.ptr<uchar>(y);
     for (int x = 3; x < s.width - 3; x++) {
       // a disparity of 1 pixel is really difficult to detect -> usally outlier
-      if (pf[x] > 1) {
+      if (pf[x] > 5) {
         disp = pf[x] / 8.0f;
         Z = fx_ * base_line_ / disp;
         X = (x - cx_) * Z / fx_;
@@ -41,7 +41,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   // should be:
   // output.header = disparity->header;
   // does not work on the rosbag with the tf broadcaster for the camera position
-  output.header.stamp = ros::Time::now();
+  output.header.stamp = disparity->header.stamp;
   // output.header.frame_id = "/world";
   output.header.frame_id = "/camera_optical_frame";
   p_cloud_pub_.publish(output);
