@@ -26,6 +26,8 @@ class Disparity2PCloud {
   float cx_ = 319.882;
   float cy_ = 235.885;
   float base_line_ = 0.06;
+  int min_count_ = 13;
+  int threshold_ = 1;
 
  public:
   Disparity2PCloud() : nh_("~") {
@@ -34,6 +36,12 @@ class Disparity2PCloud {
 
     p_cloud_pub_ =
         nh_.advertise<sensor_msgs::PointCloud2>("/point_cloud", 1, this);
+    if (!nh_.getParam("min_count", min_count_)) {
+      ROS_WARN("Failed to load parameter min_count");
+    }
+    if (!nh_.getParam("disparity_threshold", threshold_)) {
+      ROS_WARN("Failed to load parameter disparity_threshold");
+    }
   };
   // virtual ~Disparity2PCloud();
   void DisparityCb(const sensor_msgs::ImageConstPtr &msg);

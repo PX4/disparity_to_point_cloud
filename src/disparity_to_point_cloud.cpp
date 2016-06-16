@@ -8,17 +8,108 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   cv::Size s = disparity->image.size();
   float disp, X, Y, Z;
   uchar *pf;
+  uchar *pf_m1;
+  uchar *pf_m2;
+  uchar *pf_p1;
+  uchar *pf_p2;
   // form 3 to width -3 : to remove outlire on the border
-  for (int y = 3; y < s.height - 3; y++) {
-    pf = disparity->image.ptr<uchar>(y);
-    for (int x = 3; x < s.width - 3; x++) {
-      // a disparity of 1 pixel is really difficult to detect -> usally outlier
-      if (pf[x] > 5) {
-        disp = pf[x] / 8.0f;
-        Z = fx_ * base_line_ / disp;
-        X = (x - cx_) * Z / fx_;
-        Y = (y - cy_) * Z / fy_;
-        cloud_.points.push_back(pcl::PointXYZ(X, Y, Z));
+  for (int v = 30; v < s.height - 30; v++) {
+    pf = disparity->image.ptr<uchar>(v);
+    pf_m1 = disparity->image.ptr<uchar>(v - 1);
+    pf_p1 = disparity->image.ptr<uchar>(v + 1);
+    pf_m2 = disparity->image.ptr<uchar>(v - 2);
+    pf_p2 = disparity->image.ptr<uchar>(v + 2);
+    for (int u = 30; u < s.width - 30; u++) {
+      uchar value = pf[u];
+      int count = 0;
+      // a disparity of 1 pixel is really difficult to detect -> usally
+      // outlier
+      // minimal disparity 5 pixel
+      if (value > 5) {
+        if (abs(pf_m2[u - 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m2[u] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m2[u + 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m2[u - 2] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m2[u + 2] - value) < threshold_) {
+          count++;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        if (abs(pf_m1[u - 2] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m1[u - 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m1[u] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m1[u + 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_m1[u + 2] - value) < threshold_) {
+          count++;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        if (abs(pf[u - 2] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf[u - 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf[u + 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf[u + 2] - value) < threshold_) {
+          count++;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        if (abs(pf_p1[u - 2] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p1[u - 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p1[u] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p1[u + 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p1[u + 2] - value) < threshold_) {
+          count++;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        if (abs(pf_p2[u - 2] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p2[u - 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p2[u] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p2[u + 1] - value) < threshold_) {
+          count++;
+        }
+        if (abs(pf_p2[u + 2] - value) < threshold_) {
+          count++;
+        }
+
+        if (count > min_count_) {
+          disp = value / 8.0f;
+          Z = fx_ * base_line_ / disp;
+          X = (u - cx_) * Z / fx_;
+          Y = (v - cy_) * Z / fy_;
+          cloud_.points.push_back(pcl::PointXYZ(X, Y, Z));
+        }
       }
     }
   }
