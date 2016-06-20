@@ -26,6 +26,8 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
       // outlier
       // minimal disparity 5 pixel
       if (value > 5) {
+        // look in a 5x5 patch if there is consensus on the dispartiy if yes
+        // keep point otherwise not
         if (abs(pf_m2[u - 1] - value) < threshold_) {
           count++;
         }

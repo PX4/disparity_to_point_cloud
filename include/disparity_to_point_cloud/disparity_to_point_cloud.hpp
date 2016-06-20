@@ -20,7 +20,7 @@ class Disparity2PCloud {
   ros::Publisher p_cloud_pub_;
   ros::Subscriber disparity_sub_;
   pcl::PointCloud<pcl::PointXYZ> cloud_;
-  // TODO import this coefficeint with the calibration file
+  // TODO import this coefficeint with the calibration file or camera info topic
   float fx_ = 784;
   float fy_ = 784;
   float cx_ = 319.882;
