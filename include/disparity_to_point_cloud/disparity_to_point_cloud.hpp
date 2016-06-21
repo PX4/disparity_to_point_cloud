@@ -3,6 +3,8 @@
 
 #include <ros/ros.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <cv_bridge/cv_bridge.h>
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>

@@ -12,13 +12,20 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   uchar *pf_m2;
   uchar *pf_p1;
   uchar *pf_p2;
+  // cv::Mat discreateDisparity;
+  // disparity->image.convertTo(discreateDisparity, CV_32FC1);
+  cv::Mat medianFilterd;
+  cv::medianBlur(disparity->image, medianFilterd, 21);
+  // cv::imshow("disparity", disparity->image);
+  // cv::imshow("disparity median filter", medianFilterd);
+  // cv::waitKey(0);  // Wait for a keystroke in the window
   // form 3 to width -3 : to remove outlire on the border
   for (int v = 30; v < s.height - 30; v++) {
-    pf = disparity->image.ptr<uchar>(v);
-    pf_m1 = disparity->image.ptr<uchar>(v - 1);
-    pf_p1 = disparity->image.ptr<uchar>(v + 1);
-    pf_m2 = disparity->image.ptr<uchar>(v - 2);
-    pf_p2 = disparity->image.ptr<uchar>(v + 2);
+    pf = medianFilterd.ptr<uchar>(v);
+    pf_m1 = medianFilterd.ptr<uchar>(v - 1);
+    pf_p1 = medianFilterd.ptr<uchar>(v + 1);
+    pf_m2 = medianFilterd.ptr<uchar>(v - 2);
+    pf_p2 = medianFilterd.ptr<uchar>(v + 2);
     for (int u = 30; u < s.width - 30; u++) {
       uchar value = pf[u];
       int count = 0;
