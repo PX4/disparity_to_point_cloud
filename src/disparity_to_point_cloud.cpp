@@ -3,7 +3,7 @@
 namespace d2pc {
 
 void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
-
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cv::Size s = disparity->image.size();
   float disp, X, Y, Z;
@@ -14,8 +14,8 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   uchar *pf_p2;
   // cv::Mat discreateDisparity;
   // disparity->image.convertTo(discreateDisparity, CV_32FC1);
-  cv::Mat medianFilterd;
-  cv::medianBlur(disparity->image, medianFilterd, 21);
+  cv::Mat medianFilterd = disparity->image;
+  // cv::medianBlur(disparity->image, medianFilterd, 11);
   // cv::imshow("disparity", disparity->image);
   // cv::imshow("disparity median filter", medianFilterd);
   // cv::waitKey(0);  // Wait for a keystroke in the window
@@ -117,36 +117,22 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
           Z = fx_ * base_line_ / disp;
           X = (u - cx_) * Z / fx_;
           Y = (v - cy_) * Z / fy_;
-          cloud_.points.push_back(pcl::PointXYZ(X, Y, Z));
+          cloud->points.push_back(pcl::PointXYZ(X, Y, Z));
         }
       }
     }
   }
-  cloud_.width = cloud_.points.size();
-  cloud_.height = 1;
-  cloud_.is_dense = false;
-  // TODO incorporate pcl::StatisticalOutlierRemoval filter
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(
-  //     new pcl::PointCloud<pcl::PointXYZ>);
-  // pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-  // sor.setInputCloud(cloud_.makeShared());
-  // sor.setMeanK(50);
-  // sor.setStddevMulThresh(1.0);
-  // sor.filter(*cloud_filtered);
+  cloud->width = cloud->points.size();
+  cloud->height = 1;
+  cloud->is_dense = false;
   // send point cloud
-  pcl::PCLPointCloud2 dummy;
-  pcl::toPCLPointCloud2(cloud_, dummy);
   sensor_msgs::PointCloud2 output;
-  pcl_conversions::fromPCL(dummy, output);
-  // should be:
-  // output.header = disparity->header;
+  pcl::toROSMsg(*cloud, output);
   // does not work on the rosbag with the tf broadcaster for the camera position
   output.header.stamp = disparity->header.stamp;
-  // output.header.frame_id = "/world";
+  // TODO: create ros param for this
   output.header.frame_id = "/camera_optical_frame";
   p_cloud_pub_.publish(output);
-  // clear points and cloud
-  cloud_.points.clear();
 }
 
 } /* d2pc */
