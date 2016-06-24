@@ -1,5 +1,4 @@
 <launch>
-
   <arg name="min_count" default="20" />
   <arg name="disparity_threshold" default="1" />
 
@@ -10,7 +9,7 @@
     <param name="disparity_threshold" value="$(arg disparity_threshold)" />
   </node>
 
-  <!-- <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node> -->
+  <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node>
 
   <node name="message_republisher" pkg="ait_ros_messages" type="omni_vio_sensor_republisher.py" respawn="false" output="screen" ></node>
 
@@ -24,6 +23,10 @@
           <remap from="cloud_in" to="/omi_cam/point_cloud" />
    </node>
 
-<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find disparity_to_point_cloud)/rviz/d2pc.rviz" />
+   <node pkg="extract_plane" type="extract_plane_node" name="extract_plane" output="screen">
+       <remap to="/omi_cam/point_cloud" from="/input_cloud"/>
+       <remap to="/omi_cam/plane_cloud" from="/output_cloud"/>
+    </node>
 
+    <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find disparity_to_point_cloud)/rviz/d2pc.rviz" />
 </launch>
