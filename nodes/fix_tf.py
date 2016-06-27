@@ -14,5 +14,5 @@ if __name__ == '__main__':
                          ( 0.0, 1.0,0.0, 0.0),
                          rospy.Time.now(),
                          "camera_optical_frame",
-                         "vicon/test/test")
+                         "world")
         rate.sleep()
