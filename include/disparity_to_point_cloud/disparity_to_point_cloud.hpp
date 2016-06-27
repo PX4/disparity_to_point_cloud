@@ -13,13 +13,6 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-// filter point cloud
-#include <pcl/filters/statistical_outlier_removal.h>
-// plane detection
-#include <pcl/ModelCoefficients.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
 
 namespace d2pc {
 class Disparity2PCloud {
@@ -27,7 +20,6 @@ class Disparity2PCloud {
   ros::NodeHandle nh_;
   ros::Publisher p_cloud_pub_;
   ros::Subscriber disparity_sub_;
-
   // TODO import this coefficeint with the calibration file or camera info topic
   float fx_ = 784;
   float fy_ = 784;

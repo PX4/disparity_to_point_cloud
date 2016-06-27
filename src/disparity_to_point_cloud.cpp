@@ -15,6 +15,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   // cv::Mat discreateDisparity;
   // disparity->image.convertTo(discreateDisparity, CV_32FC1);
   cv::Mat medianFilterd = disparity->image;
+  // cv::Mat medianFilterd;
   // cv::medianBlur(disparity->image, medianFilterd, 11);
   // cv::imshow("disparity", disparity->image);
   // cv::imshow("disparity median filter", medianFilterd);
