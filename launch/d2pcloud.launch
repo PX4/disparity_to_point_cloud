@@ -9,7 +9,8 @@
     <param name="disparity_threshold" value="$(arg disparity_threshold)" />
   </node>
 
-  <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node>
+  <!-- <node name="tf_fix_broad" pkg="disparity_to_point_cloud" type="fix_tf.py" respawn="false" output="screen" ></node> -->
+  <node pkg="tf" type="static_transform_publisher" name="camera_tf_broadcaster" args="0.1 0 0 3.14 0 0 body_frame camera_optical_frame 100" />
 
   <node name="message_republisher" pkg="ait_ros_messages" type="omni_vio_sensor_republisher.py" respawn="false" output="screen" ></node>
 
