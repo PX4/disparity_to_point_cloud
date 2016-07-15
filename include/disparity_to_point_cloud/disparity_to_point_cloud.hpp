@@ -25,7 +25,7 @@ class Disparity2PCloud {
   float fy_ = 784;
   float cx_ = 319.882;
   float cy_ = 235.885;
-  float base_line_ = 0.06;
+  float base_line_ = 0.2;
   int min_count_ = 13;
   int threshold_ = 1;
 
