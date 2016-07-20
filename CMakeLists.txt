@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(PCL REQUIRED)
-
+find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -121,6 +121,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,6 +130,7 @@ add_library(disparity_to_point_cloud
 )
 target_link_libraries(disparity_to_point_cloud
   ${PCL_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -147,6 +149,7 @@ target_link_libraries(disparity_to_point_cloud_node
   disparity_to_point_cloud
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 #############
