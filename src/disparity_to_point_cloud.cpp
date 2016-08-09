@@ -43,6 +43,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   // TODO: create ros param for this
   output.header.frame_id = "/camera_optical_frame";
   p_cloud_pub_.publish(output);
+  cloud.reset();
 }
 
 } /* d2pc */
