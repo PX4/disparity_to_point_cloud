@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion" output="screen">
+    <remap to="/uvc_camera/cam_0/image_raw" from="/matching_score_1"/>
+    <remap to="/uvc_camera/cam_1/image_raw" from="/disparity_1"/>
+    <remap to="/uvc_camera/cam_2/image_raw" from="/matching_score_2"/>
+    <remap to="/uvc_camera/cam_3/image_raw" from="/disparity_2"/>
+
+    <param name="offset_x" value="-7" />
+    <param name="offset_y" value="15" />
+  </node>
+</launch>

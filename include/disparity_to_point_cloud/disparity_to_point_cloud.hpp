@@ -26,7 +26,7 @@ class Disparity2PCloud {
   float fy_ = 713.5;
   float cx_ = 376;
   float cy_ = 240;
-  float base_line_ = 0.043;
+  float base_line_ = 0.09;
   int min_count_ = 20;
   int threshold_ = 1;
   cv::Mat Q_;
@@ -39,6 +39,7 @@ class Disparity2PCloud {
 
     p_cloud_pub_ =
         nh_.advertise<sensor_msgs::PointCloud2>("/point_cloud", 1, this);
+
     if (!nh_.getParam("min_count", min_count_)) {
       ROS_WARN("Failed to load parameter min_count");
     }
