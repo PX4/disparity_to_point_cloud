@@ -33,16 +33,20 @@ class DepthMapFusion {
   ros::Publisher cropped_depth_2_pub_;
   ros::Publisher cropped_score_1_pub_;
   ros::Publisher cropped_score_2_pub_;
+  ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
 
   cv::Mat cropped_depth_1_;
   cv::Mat cropped_depth_2_;
   cv::Mat cropped_score_1_;
   cv::Mat cropped_score_2_;
+  cv::Mat cropped_score_combined_;
   cv::Mat cropped_score_1_grad_;
   cv::Mat cropped_score_2_grad_;
 
   std::deque<int> previous_errors_;
+  int RAINBOW_WITH_BLACK = -1;
+  int GRAY_SCALE = -2;
 
  public:
   int offset_x_ = 0;
@@ -60,6 +64,7 @@ class DepthMapFusion {
     cropped_score_1_pub_ = nh_.advertise<sensor_msgs::Image>("/cropped_score_1", 5);
     cropped_score_2_pub_ = nh_.advertise<sensor_msgs::Image>("/cropped_score_2", 5);
     fused_pub_ = nh_.advertise<sensor_msgs::Image>("/fused_depth_map", 5);
+    cropped_score_combined_pub_ = nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
     grad_pub_ = nh_.advertise<sensor_msgs::Image>("/gradient", 5);
 
     if (!nh_.getParam("offset_x", offset_x_)) {

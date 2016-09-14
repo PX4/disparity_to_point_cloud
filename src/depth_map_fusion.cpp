@@ -7,9 +7,8 @@ void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cropped_depth_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
 
-  publishWithColor(msg, cropped_depth_1_, cropped_depth_1_pub_, -1);
+  publishWithColor(msg, cropped_depth_1_, cropped_depth_1_pub_, RAINBOW_WITH_BLACK);
 
-  publishFusedDepthMap(msg);
 }
 
 void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
@@ -17,7 +16,8 @@ void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat rot_mat = rotateMat(disparity->image);
   cropped_depth_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
 
-  publishWithColor(msg, cropped_depth_2_, cropped_depth_2_pub_, -1);
+  publishWithColor(msg, cropped_depth_2_, cropped_depth_2_pub_, RAINBOW_WITH_BLACK);
+  publishFusedDepthMap(msg);
 }
 
 void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
@@ -32,7 +32,7 @@ void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
   cropped_score_1_grad_ = cropped_score_1_ + 2 * cropped_score_1_grad_;
   cropped_score_1_ = cropped_score_1_grad_;
 
-  publishWithColor(msg, cropped_score_1_, cropped_score_1_pub_, cv::COLORMAP_BONE);
+  publishWithColor(msg, cropped_score_1_, cropped_score_1_pub_, GRAY_SCALE);
 }
 
 void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
@@ -48,7 +48,7 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   cropped_score_2_grad_ = cropped_score_2_ + 2 * cropped_score_2_grad_;
   cropped_score_2_ = cropped_score_2_grad_;
 
-  publishWithColor(msg, cropped_score_2_, cropped_score_2_pub_, cv::COLORMAP_BONE);
+  publishWithColor(msg, cropped_score_2_, cropped_score_2_pub_, GRAY_SCALE);
 }
 
 
@@ -62,17 +62,23 @@ void DepthMapFusion::publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg)
     return; // Have not recieved all depth maps and scores
   }
 
+  cropped_score_combined_ = cropped_score_1_;
   // For each pixel, calculate a new distance
   for (int i=0; i < cropped_depth_2_.rows; ++i) {
     for (int j=0; j < cropped_depth_2_.cols; ++j) {
       disparity->image.at<unsigned char>(i, j) = getFusedDistance(i, j);
+      unsigned char combined_confidence = std::min(cropped_score_1_grad_.at<unsigned char>(i, j), cropped_score_2_grad_.at<unsigned char>(i, j));
+      cropped_score_combined_.at<unsigned char>(i, j) = combined_confidence;
     }
   }
+  cv::medianBlur(disparity->image, disparity->image, 3);
+
+  publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_, GRAY_SCALE);
 
   // Just remove the borders, probably overkill
   disparity->image = cropMat(disparity->image, 20, 20, 20, 20);
 
-  publishWithColor(msg, disparity->image, grad_pub_, -1);
+  publishWithColor(msg, disparity->image, grad_pub_, RAINBOW_WITH_BLACK);
 
   sensor_msgs::Image fused_image;
   disparity->toImageMsg(fused_image);
@@ -160,11 +166,17 @@ int DepthMapFusion::blackToWhite(int dist1, int dist2, int score1, int score2) {
 int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2, int grad1, int grad2) {
   int thres = 80; 
   int tooClose = 230;
+
+  float relative_diff = float(dist1) / float(dist2);
+
   if (score1 < score2 && score1 < thres && dist1 < tooClose) {
     return dist1;
   }
   else if (score2 < score1 && score2 < thres && dist2 < tooClose) {
     return dist2;
+  }
+  else if (0.8 < relative_diff && relative_diff < 1.25 && score1 < 1.5 * thres && score2 < 1.5 * thres) {
+    return float(dist1 + dist2) / 2.0;
   }
   return 0;
 }
@@ -208,8 +220,18 @@ cv::Mat DepthMapFusion::rotateMat(const cv::Mat &mat) {
 void DepthMapFusion::publishWithColor(const sensor_msgs::ImageConstPtr &msg, const cv::Mat &mat,
                                       const ros::Publisher &publisher, int colormap) {
 
+  if (colormap == GRAY_SCALE) {
+    // publish original mat
+    cv_bridge::CvImage out_msg;
+    out_msg.header = msg->header; 
+    out_msg.encoding = "mono8";
+    out_msg.image = mat; 
+    publisher.publish(out_msg.toImageMsg());
+    return;
+  }
+
   cv::Mat colored_mat;
-  if (colormap == -1) {
+  if (colormap == RAINBOW_WITH_BLACK) {
     colorizeDepth(mat, colored_mat);
   }
   else {
