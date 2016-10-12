@@ -26,7 +26,8 @@ class Disparity2PCloud {
   float fy_ = 713.5;
   float cx_ = 376;
   float cy_ = 240;
-  float base_line_ = 0.09;
+  // float base_line_ = 0.043; // odroid stereo
+  float base_line_ = 0.09;    // Omni-stereo 
   int min_count_ = 20;
   int threshold_ = 1;
   cv::Mat Q_;

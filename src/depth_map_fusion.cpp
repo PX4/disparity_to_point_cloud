@@ -76,7 +76,7 @@ void DepthMapFusion::publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg)
   publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_, GRAY_SCALE);
 
   // Just remove the borders, probably overkill
-  disparity->image = cropMat(disparity->image, 20, 20, 20, 20);
+  disparity->image = cropMat(disparity->image, 0, 40, 30, 10);
 
   publishWithColor(msg, disparity->image, grad_pub_, RAINBOW_WITH_BLACK);
 
@@ -164,7 +164,7 @@ int DepthMapFusion::blackToWhite(int dist1, int dist2, int score1, int score2) {
 }
 
 int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2, int grad1, int grad2) {
-  int thres = 80; 
+  int thres = 100; 
   int tooClose = 230;
 
   float relative_diff = float(dist1) / float(dist2);
@@ -175,7 +175,7 @@ int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2, int
   else if (score2 < score1 && score2 < thres && dist2 < tooClose) {
     return dist2;
   }
-  else if (0.8 < relative_diff && relative_diff < 1.25 && score1 < 1.5 * thres && score2 < 1.5 * thres) {
+  else if (0.8 < relative_diff && relative_diff < 1.25 && score1 < 1.25 * thres && score2 < 1.25 * thres) {
     return float(dist1 + dist2) / 2.0;
   }
   return 0;
