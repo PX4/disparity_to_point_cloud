@@ -22,8 +22,8 @@ catkin build
 
 ## Configuration
 You need to change the input remap in the launch file for your images and point cloud topics:
-- disparity image: https://github.com/simonegu/disparity_to_point_cloud/blob/master/launch/d2pcloud.launch#L3
-- point cloud : https://github.com/simonegu/disparity_to_point_cloud/blob/master/launch/d2pcloud.launch#L4
+- disparity image: https://github.com/PX4/disparity_to_point_cloud/blob/master/launch/d2pcloud.launch#L3
+- point cloud : https://github.com/PX4/disparity_to_point_cloud/blob/master/launch/d2pcloud.launch#L4
 
 ## Use
 After starting your ```roscore``` use this to launch disparity_to_point_cloud:
