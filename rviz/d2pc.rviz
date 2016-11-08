@@ -8,6 +8,8 @@ Panels:
         - /Status1
         - /TF1
         - /TF1/Frames1
+        - /Image1
+        - /depthmap1
       Splitter Ratio: 0.787791
     Tree Height: 279
   - Class: rviz/Selection
@@ -28,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -55,18 +57,35 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        camera_optical_frame:
+          Value: true
+        fcu:
+          Value: false
+        fcu_utm:
+          Value: false
+        stereo_cam::stereo_camera_link:
+          Value: true
+        world:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        world:
+          fcu:
+            {}
+          fcu_utm:
+            {}
+          stereo_cam::stereo_camera_link:
+            camera_optical_frame:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /cam0_image
+      Image Topic: /gazebo/omni_rig/cam0_image
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -78,7 +97,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /cam1_image
+      Image Topic: /cam_1/image_raw
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -159,7 +178,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: local_origin
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -180,7 +199,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.73029
+      Distance: 2.62492
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -192,10 +211,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.164797
+      Pitch: 0.5202
       Target Frame: camera_optical_frame
       Value: Orbit (rviz)
-      Yaw: 4.77675
+      Yaw: 6.23993
     Saved: ~
 Window Geometry:
   Displays:
