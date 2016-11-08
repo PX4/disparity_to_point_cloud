@@ -22,14 +22,12 @@ class Disparity2PCloud {
   ros::Publisher p_cloud_pub_;
   ros::Subscriber disparity_sub_;
   // TODO import this coefficeint with the calibration file or camera info topic
-  float fx_ = 714.24;
-  float fy_ = 713.5;
-  float cx_ = 376;
-  float cy_ = 240;
-  // float base_line_ = 0.043; // odroid stereo
-  float base_line_ = 0.09;    // Omni-stereo 
-  int min_count_ = 20;
-  int threshold_ = 1;
+  double fx_ = 714.24;
+  double fy_ = 713.5;
+  double cx_ = 376;
+  double cy_ = 240;
+  // double base_line_ = 0.043; // odroid stereo
+  double base_line_ = 0.09;    // Omni-stereo
   cv::Mat Q_;
 
  public:
@@ -41,12 +39,12 @@ class Disparity2PCloud {
     p_cloud_pub_ =
         nh_.advertise<sensor_msgs::PointCloud2>("/point_cloud", 1, this);
 
-    if (!nh_.getParam("min_count", min_count_)) {
-      ROS_WARN("Failed to load parameter min_count");
-    }
-    if (!nh_.getParam("disparity_threshold", threshold_)) {
-      ROS_WARN("Failed to load parameter disparity_threshold");
-    }
+    // Get Ros parameters
+    nh_.param<double>("fx_", fx_, 714.24);
+    nh_.param<double>("fy_", fy_, 713.5);
+    nh_.param<double>("cx_", cx_, 376);
+    nh_.param<double>("cy_", cy_, 240);
+    nh_.param<double>("base_line_", base_line_, 0.09);
 
     cv::Mat K = (cv::Mat_<double>(3, 3) << fx_, 0, cx_, 0, fy_, cy_, 0, 0, 1);
     cv::Mat distCoeff1 = (cv::Mat_<double>(5, 1) << 0.0, 0.0, 0.0, 0.0, 0.0);
