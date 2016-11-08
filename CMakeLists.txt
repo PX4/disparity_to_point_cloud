@@ -105,7 +105,7 @@ find_package(OpenCV REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES disparity_to_point_cloud
+ LIBRARIES disparity_to_point_cloud depth_map_fusion
  CATKIN_DEPENDS roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
@@ -128,7 +128,14 @@ include_directories(
 add_library(disparity_to_point_cloud
   src/disparity_to_point_cloud.cpp
 )
+add_library(depth_map_fusion
+  src/depth_map_fusion.cpp
+)
 target_link_libraries(disparity_to_point_cloud
+  ${PCL_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+target_link_libraries(depth_map_fusion
   ${PCL_LIBRARIES}
   ${OpenCV_LIBS}
 )
@@ -136,9 +143,11 @@ target_link_libraries(disparity_to_point_cloud
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 add_dependencies(disparity_to_point_cloud ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(depth_map_fusion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 add_executable(disparity_to_point_cloud_node src/disparity_to_point_cloud_node.cpp)
+add_executable(depth_map_fusion_node src/depth_map_fusion_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -147,6 +156,13 @@ add_executable(disparity_to_point_cloud_node src/disparity_to_point_cloud_node.c
 ## Specify libraries to link a library or executable target against
 target_link_libraries(disparity_to_point_cloud_node
   disparity_to_point_cloud
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+
+target_link_libraries(depth_map_fusion_node
+  depth_map_fusion
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
   ${OpenCV_LIBS}
