@@ -41,12 +41,13 @@
 
 #include "disparity_to_point_cloud/disparity_to_point_cloud.hpp"
 
-#include <ros/ros.h>
+// #include <ros/ros.h>
+#include <disparity_to_point_cloud/ros_api.h>
 
 int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "disparity_to_point_cloud");
+  RosAPI::init(argc, argv, "disparity_to_point_cloud");
   d2pc::Disparity2PCloud d2pcloud;
   // Endless loop
-  ros::spin();
+  RosAPI::spin(d2pcloud.nh_);
   return 0;
 }

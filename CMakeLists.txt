@@ -119,6 +119,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   include
+  ros_api/ros1_api
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}

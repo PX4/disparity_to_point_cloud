@@ -42,26 +42,27 @@
 #ifndef __DISPARITY_TO_POINT_CLOUD_HPP__
 #define __DISPARITY_TO_POINT_CLOUD_HPP__
 
-#include <ros/ros.h>
+// #include <ros/ros.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <cv_bridge/cv_bridge.h>
 // PCL specific includes
-#include <sensor_msgs/PointCloud2.h>
+// #include <sensor_msgs/PointCloud2.h>
 #include <pcl/PCLPointCloud2.h>
-#include <pcl_ros/point_cloud.h>
+// #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#include <disparity_to_point_cloud/ros_api.h>
+
 namespace d2pc {
 class Disparity2PCloud {
  private:
-  ros::NodeHandle nh_;
-  ros::Publisher p_cloud_pub_;
-  ros::Subscriber disparity_sub_;
+  RosAPI::Publisher<sensor_msgs::PointCloud2> p_cloud_pub_;
+  RosAPI::Subscriber<sensor_msgs::ImageConstPtr> disparity_sub_;
   // TODO import this coefficeint with the calibration file or camera info topic
   double fx_ = 714.24;
   double fy_ = 713.5;
@@ -72,20 +73,22 @@ class Disparity2PCloud {
   cv::Mat Q_;
 
  public:
-  Disparity2PCloud() : nh_("~") {
+  std::shared_ptr<RosAPI::Node> nh_;
+  Disparity2PCloud() {
+    nh_ = std::make_shared<RosAPI::Node>();
     printf("Constructor start\n");
-    disparity_sub_ =
-        nh_.subscribe("/disparity", 1, &Disparity2PCloud::DisparityCb, this);
+    disparity_sub_.init("disparity", nh_.get(), &Disparity2PCloud::DisparityCb, this);
+        // nh_.subscribe("/disparity", 1, &Disparity2PCloud::DisparityCb, this);
 
-    p_cloud_pub_ =
-        nh_.advertise<sensor_msgs::PointCloud2>("/point_cloud", 1, this);
+    p_cloud_pub_.advertise("point_cloud", nh_.get());
+        // nh_.advertise<sensor_msgs::PointCloud2>("/point_cloud", 1, this);
 
     // Get Ros parameters
-    nh_.param<double>("fx_", fx_, 714.24);
-    nh_.param<double>("fy_", fy_, 713.5);
-    nh_.param<double>("cx_", cx_, 376);
-    nh_.param<double>("cy_", cy_, 240);
-    nh_.param<double>("base_line_", base_line_, 0.09);
+    RosAPI::getParamWithDefault(nh_.get(), "fx_", fx_, 714.24);
+    RosAPI::getParamWithDefault(nh_.get(), "fy_", fy_, 713.5);
+    RosAPI::getParamWithDefault(nh_.get(), "cx_", cx_, 376.0);
+    RosAPI::getParamWithDefault(nh_.get(), "cy_", cy_, 240.0);
+    RosAPI::getParamWithDefault(nh_.get(), "base_line_", base_line_, 0.09);
 
     cv::Mat K = (cv::Mat_<double>(3, 3) << fx_, 0, cx_, 0, fy_, cy_, 0, 0, 1);
     cv::Mat distCoeff1 = (cv::Mat_<double>(5, 1) << 0.0, 0.0, 0.0, 0.0, 0.0);

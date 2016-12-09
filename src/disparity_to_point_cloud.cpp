@@ -47,14 +47,20 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   printf("start \n");
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
   printf("new point cloud \n");
-  cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
+  
+  
+  // cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
+  const cv::Mat disparity((int)msg->height, (int)msg->width, CV_8UC1,
+                          const_cast<uint8_t*>(&msg->data[0]), (size_t)msg->step);
+
   printf("toCvCopy \n");
-  cv::Size s = disparity->image.size();
+  // cv::Size s = disparity.size;
+  cv::Size s(msg->width, msg->height);
   cv::Vec3f *pv;
 
   cv::Mat median_filtered(s, CV_8U);
   // cv::Mat median_filtered = disparity->image;
-  cv::medianBlur(disparity->image, median_filtered, 11);
+  cv::medianBlur(disparity, median_filtered, 11);
   printf("medianBlur \n");
 
   cv::Mat real_disparity(s, CV_32FC1);
@@ -84,7 +90,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   sensor_msgs::PointCloud2 output;
   pcl::toROSMsg(*cloud, output);
   // does not work on the rosbag with the tf broadcaster for the camera position
-  output.header.stamp = disparity->header.stamp;
+  output.header.stamp = msg->header.stamp;
   // TODO: create ros param for this
   output.header.frame_id = "/camera_optical_frame";
   p_cloud_pub_.publish(output);
