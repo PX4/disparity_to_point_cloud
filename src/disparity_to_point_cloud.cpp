@@ -88,7 +88,8 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   printf("Cloud size: %d\n", cloud->points.size());
   // send point cloud
   sensor_msgs::PointCloud2 output;
-  pcl::toROSMsg(*cloud, output);
+  // pcl::toROSMsg(*cloud, output);
+  RosAPI::toROSMsg(*cloud, output);
   // does not work on the rosbag with the tf broadcaster for the camera position
   output.header.stamp = msg->header.stamp;
   // TODO: create ros param for this

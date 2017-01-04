@@ -1,6 +1,6 @@
 <launch>
   <node pkg="disparity_to_point_cloud" type="disparity_to_point_cloud_node" name="disparity_to_point_cloud" output="screen">
-    <remap to="/stereo/disparity_image" from="/disparity"/>
+    <remap to="/uvc_camera/cam_0/image_depth" from="/disparity"/>
     <remap to="/omi_cam/point_cloud" from="/point_cloud"/>
   </node>
 
