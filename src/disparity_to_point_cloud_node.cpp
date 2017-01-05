@@ -46,8 +46,13 @@
 
 int main(int argc, char *argv[]) {
   RosAPI::init(argc, argv, "disparity_to_point_cloud");
-  d2pc::Disparity2PCloud d2pcloud;
+
+  auto disparity_node = std::make_shared<d2pc::Disparity2PCloud>();
+  RosAPI::spin(disparity_node);
+
+  
+  // d2pc::Disparity2PCloud d2pcloud;
   // Endless loop
-  RosAPI::spin(d2pcloud.nh_);
+  // RosAPI::spin(d2pcloud.nh_);
   return 0;
 }

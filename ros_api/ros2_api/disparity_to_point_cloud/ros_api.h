@@ -28,7 +28,7 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
-#include <ros2_additional_fix.h>
+#include <disparity_to_point_cloud/ros2_additional_fix.h>
 
 // #include "avoidance/msg/three_point_msg.hpp"
 
@@ -130,24 +130,37 @@ class Subscriber {
   Subscriber() {}
 
   template <typename Method, typename T>
-  Subscriber(const std::string & topic, RosAPI::Node * node_handle, Method method, T obj) {
-    init(topic, node_handle, method, obj);
+  Subscriber(const std::string & topic, RosAPI::Node * node_handle, 
+             Method method, T obj, const std::string & profile_name = "sensor") 
+  {
+    init(topic, node_handle, method, obj, profile_name);
   }
 
   template <typename Callback>
-  Subscriber(const std::string & topic, RosAPI::Node * node_handle, Callback callback) {
-    init(topic, node_handle, callback);
+  Subscriber(const std::string & topic, RosAPI::Node * node_handle, 
+             Callback callback, const std::string & profile_name = "sensor") 
+  {
+    init(topic, node_handle, callback, profile_name);
   }
 
   template <typename Method, typename T>
-  void init(const std::string & topic, RosAPI::Node * node_handle, Method method, T obj){
+  void init(const std::string & topic, RosAPI::Node * node_handle, 
+            Method method, T obj, const std::string & profile_name = "sensor") 
+  {
     auto callback = std::bind(method, obj, std::placeholders::_1);
-    init(topic, node_handle, callback);
+    init(topic, node_handle, callback, profile_name);
   }
 
   template <typename Callback>
-  void init(const std::string & topic, RosAPI::Node * node_handle, Callback callback){
-    subscription_ = node_handle->create_subscription<MsgType>(topic, callback, rmw_qos_profile_sensor_data);
+  void init(const std::string & topic, RosAPI::Node * node_handle, 
+            Callback callback, const std::string & profile_name = "sensor")
+  {
+    rmw_qos_profile_t profile; 
+    if      (profile_name == "default")   profile = rmw_qos_profile_default;
+    else if (profile_name == "sensor")    profile = rmw_qos_profile_sensor_data;
+    else if (profile_name == "camera")    profile = rmw_qos_profile_services_default;
+    
+    subscription_ = node_handle->create_subscription<MsgType>(topic, callback, profile);
   }
 
   typename rclcpp::Subscription<MsgType>::SharedPtr subscription_;

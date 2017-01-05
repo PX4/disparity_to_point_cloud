@@ -5,11 +5,11 @@
 // #include <ros/console.h>
 
 // #include <ait_ros_messages/msg/vio_sensor_msg.hpp>
-#include <ait_ros_messages/msg/vio_sensor_msg.hpp>
+// #include <ait_ros_messages/msg/vio_sensor_msg.hpp>
 
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/image.hpp>
-#include <sensor_msgs/msg/imu.hpp>
+// #include <sensor_msgs/msg/imu.hpp>
 // #include <sensor_msgs/fill_image.h>
 
 namespace sensor_msgs
@@ -45,10 +45,10 @@ namespace sensor_msgs
 
 namespace RosAPI {
 	
-inline int addPointField(sensor_msgs::PointCloud2 & cloud_msg, const std::string & name, 
+inline int addPointField(sensor_msgs::msg::PointCloud2 & cloud_msg, const std::string & name, 
 						 int count, int datatype, int offset)
 {
-  sensor_msgs::PointField point_field;
+  sensor_msgs::msg::PointField point_field;
   point_field.name = name;
   point_field.count = count;
   point_field.datatype = datatype;
@@ -59,8 +59,8 @@ inline int addPointField(sensor_msgs::PointCloud2 & cloud_msg, const std::string
   return offset + point_field.count * 4;
 }
 
-void toROSMsg(const pcl::PointCloud<pcl::PointXYZ> & cloud_in, 
-			   sensor_msgs::PointCloud2 & cloud_out) 
+inline void toROSMsg(const pcl::PointCloud<pcl::PointXYZ> & cloud_in, 
+			   sensor_msgs::msg::PointCloud2 & cloud_out) 
 {	
 
 	int n = cloud_in.points.size();
@@ -68,9 +68,9 @@ void toROSMsg(const pcl::PointCloud<pcl::PointXYZ> & cloud_in,
 	cloud_out.width = n;
 
 	int offset = 0;
-	offset = addPointField(cloud_out, "x", 1, sensor_msgs::PointField::FLOAT32, offset);
-    offset = addPointField(cloud_out, "y", 1, sensor_msgs::PointField::FLOAT32, offset);
-	offset = addPointField(cloud_out, "z", 1, sensor_msgs::PointField::FLOAT32, offset);
+	offset = addPointField(cloud_out, "x", 1, sensor_msgs::msg::PointField::FLOAT32, offset);
+    offset = addPointField(cloud_out, "y", 1, sensor_msgs::msg::PointField::FLOAT32, offset);
+	offset = addPointField(cloud_out, "z", 1, sensor_msgs::msg::PointField::FLOAT32, offset);
 	offset = 16;
 
 	cloud_out.is_bigendian = false;

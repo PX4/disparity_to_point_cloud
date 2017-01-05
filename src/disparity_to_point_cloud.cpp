@@ -43,7 +43,7 @@
 
 namespace d2pc {
 
-void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
+void Disparity2PCloud::DisparityCb(const sensor_msgs::Image::ConstPtr msg) {
   printf("start \n");
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
   printf("new point cloud \n");
