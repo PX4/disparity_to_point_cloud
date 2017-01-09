@@ -56,7 +56,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <disparity_to_point_cloud/ros_api.h>
+#include <ros_api/ros_api.h>
+#include <ros_api_extend/ros_api_extend.h>
+
 
 namespace d2pc {
 class Disparity2PCloud : public RosAPI::Node {

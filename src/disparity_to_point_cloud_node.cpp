@@ -42,7 +42,7 @@
 #include "disparity_to_point_cloud/disparity_to_point_cloud.hpp"
 
 // #include <ros/ros.h>
-#include <disparity_to_point_cloud/ros_api.h>
+#include <ros_api/ros_api.h>
 
 int main(int argc, char *argv[]) {
   RosAPI::init(argc, argv, "disparity_to_point_cloud");

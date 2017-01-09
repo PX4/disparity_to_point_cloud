@@ -1,0 +1,3 @@
+*.clang_complete
+*.clang-format
+include/ros_api

@@ -22,7 +22,8 @@ find_package(OpenCV REQUIRED)
 
 include_directories(
   include
-  ros_api/ros2_api
+  include/ros_api/ros2_api
+  include/ros_api_extend/ros2_api_extend
   ${PCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
