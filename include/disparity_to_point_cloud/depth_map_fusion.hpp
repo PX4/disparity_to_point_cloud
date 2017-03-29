@@ -43,6 +43,7 @@
 
 #include <deque>
 #include <numeric>
+#include <string> 
 
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
@@ -63,26 +64,19 @@ namespace depth_map_fusion {
 class DepthMapFusion {
  private:
   ros::NodeHandle nh_;
-  ros::Subscriber disparity1_sub_;
-  ros::Subscriber disparity2_sub_;
-  ros::Subscriber matching_score_1_sub_;
-  ros::Subscriber matching_score_2_sub_;
+  std::vector<ros::Subscriber> disparity_subs_;
+  std::vector<ros::Subscriber> matching_score_subs_;
+  std::vector<ros::Publisher> cropped_depth_pubs_;
+  std::vector<ros::Publisher> cropped_score_pubs_;
 
   ros::Publisher fused_pub_;
-  ros::Publisher cropped_depth_1_pub_;
-  ros::Publisher cropped_depth_2_pub_;
-  ros::Publisher cropped_score_1_pub_;
-  ros::Publisher cropped_score_2_pub_;
   ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
 
-  cv::Mat cropped_depth_1_;
-  cv::Mat cropped_depth_2_;
-  cv::Mat cropped_score_1_;
-  cv::Mat cropped_score_2_;
+  std::vector<cv::Mat> cropped_depth_mats_;
+  std::vector<cv::Mat> cropped_score_mats_;
+  std::vector<cv::Mat> cropped_score_grads_;
   cv::Mat cropped_score_combined_;
-  cv::Mat cropped_score_1_grad_;
-  cv::Mat cropped_score_2_grad_;
 
   std::deque<int> previous_errors_;
   int RAINBOW_WITH_BLACK = -1;
@@ -94,23 +88,38 @@ class DepthMapFusion {
   double scaling_factor_ = 1.0;
 
   DepthMapFusion() : nh_("~") {
-    disparity1_sub_ =
-        nh_.subscribe("/disparity_1", 1, &DepthMapFusion::DisparityCb1, this);
-    disparity2_sub_ =
-        nh_.subscribe("/disparity_2", 1, &DepthMapFusion::DisparityCb2, this);
-    matching_score_1_sub_ = nh_.subscribe(
-        "/matching_score_1", 1, &DepthMapFusion::MatchingScoreCb1, this);
-    matching_score_2_sub_ = nh_.subscribe(
-        "/matching_score_2", 1, &DepthMapFusion::MatchingScoreCb2, this);
+    const int num_pairs = 2;
+    for (int i=0; i < num_pairs; ++i) {
+      std::string disparity_topic = "/disparity_" + std::to_string(i);
+      auto disparity_callback = std::bind(&DepthMapFusion::DisparityCb1, this, _1, i);
+      disparity_subs_[i] = nh_.subscribe(disparity_topic, 1, disparity_callback);
 
-    cropped_depth_1_pub_ =
-        nh_.advertise<sensor_msgs::Image>("/cropped_depth_1", 5);
-    cropped_depth_2_pub_ =
-        nh_.advertise<sensor_msgs::Image>("/cropped_depth_2", 5);
-    cropped_score_1_pub_ =
-        nh_.advertise<sensor_msgs::Image>("/cropped_score_1", 5);
-    cropped_score_2_pub_ =
-        nh_.advertise<sensor_msgs::Image>("/cropped_score_2", 5);
+      std::string matching_score_topic = "/matching_score_" + std::to_string(i);
+      auto matching_score_callback = std::bind(&DepthMapFusion::MatchingScoreCb, this, _1, i);
+      matching_score_subs_[i] = nh_.subscribe(matching_score_topic, 1, matching_score_callback);
+
+      cropped_depth_pubs_[i] =
+        nh_.advertise<sensor_msgs::Image>("/cropped_depth_" + std::to_string(i), 5);
+      cropped_score_pubs_[i] =
+        nh_.advertise<sensor_msgs::Image>("/cropped_score_" + std::to_string(i), 5);
+    }
+    // disparity1_sub_ =
+    //     nh_.subscribe("/disparity_1", 1, &DepthMapFusion::DisparityCb1, this);
+    // disparity2_sub_ =
+    //     nh_.subscribe("/disparity_2", 1, &DepthMapFusion::DisparityCb2, this);
+    // matching_score_1_sub_ = nh_.subscribe(
+    //     "/matching_score_1", 1, &DepthMapFusion::MatchingScoreCb1, this);
+    // matching_score_2_sub_ = nh_.subscribe(
+    //     "/matching_score_2", 1, &DepthMapFusion::MatchingScoreCb2, this);
+
+    // cropped_depth_1_pub_ =
+    //     nh_.advertise<sensor_msgs::Image>("/cropped_depth_1", 5);
+    // cropped_depth_2_pub_ =
+    //     nh_.advertise<sensor_msgs::Image>("/cropped_depth_2", 5);
+    // cropped_score_1_pub_ =
+    //     nh_.advertise<sensor_msgs::Image>("/cropped_score_1", 5);
+    // cropped_score_2_pub_ =
+    //     nh_.advertise<sensor_msgs::Image>("/cropped_score_2", 5);
     fused_pub_ = nh_.advertise<sensor_msgs::Image>("/fused_depth_map", 5);
     cropped_score_combined_pub_ =
         nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
