@@ -45,7 +45,9 @@ namespace depth_map_fusion {
 // Callbacks
 void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cropped_depth_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+  cv::Mat rot_mat = rotateMat(disparity->image);
+  cropped_depth_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+ // cropped_depth_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
 
   publishWithColor(msg, cropped_depth_1_, cropped_depth_1_pub_,
                    RAINBOW_WITH_BLACK);
@@ -53,8 +55,10 @@ void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cv::Mat rot_mat = rotateMat(disparity->image);
-  cropped_depth_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  //cv::Mat rot_mat = rotateMat(disparity->image);
+  //cropped_depth_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  cropped_depth_2_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+
 
   publishWithColor(msg, cropped_depth_2_, cropped_depth_2_pub_,
                    RAINBOW_WITH_BLACK);
@@ -63,13 +67,15 @@ void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cropped_score_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+  //cropped_score_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+  cv::Mat rot_mat = rotateMat(disparity->image);
+  cropped_score_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
 
   // cropped_score_1_grad_ should eventually have high values around horizontal
   // lines
   cv::GaussianBlur(cropped_score_1_, cropped_score_1_grad_, cv::Size(13, 13),
                    3.0);
-  cv::Sobel(cropped_score_1_grad_, cropped_score_1_grad_, -1, 0, 2, 7, 0.03);
+  cv::Sobel(cropped_score_1_grad_, cropped_score_1_grad_, -1, 2, 0, 7, 0.03);
   threshold(cropped_score_1_grad_, cropped_score_1_grad_, 30, 255, 0);
   cv::GaussianBlur(cropped_score_1_grad_, cropped_score_1_grad_,
                    cv::Size(21, 21), 10.0);
@@ -81,14 +87,15 @@ void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cv::Mat rot_mat = rotateMat(disparity->image);
-  cropped_score_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  //cv::Mat rot_mat = rotateMat(disparity->image);
+  //cropped_score_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  cropped_score_2_ = cropToSquare(disparity->image, offset_x_, offset_y_);
 
   // cropped_score_2_grad_ should eventually have high values around vertical
   // lines
   cv::GaussianBlur(cropped_score_2_, cropped_score_2_grad_, cv::Size(13, 13),
                    3.0);
-  cv::Sobel(cropped_score_2_grad_, cropped_score_2_grad_, -1, 2, 0, 7, 0.03);
+  cv::Sobel(cropped_score_2_grad_, cropped_score_2_grad_, -1, 0, 2, 7, 0.03);
   threshold(cropped_score_2_grad_, cropped_score_2_grad_, 30, 255, 0);
   cv::GaussianBlur(cropped_score_2_grad_, cropped_score_2_grad_,
                    cv::Size(21, 21), 10.0);
@@ -121,13 +128,13 @@ void DepthMapFusion::publishFusedDepthMap(
       cropped_score_combined_.at<unsigned char>(i, j) = combined_confidence;
     }
   }
-  cv::medianBlur(disparity->image, disparity->image, 3);
+  //cv::medianBlur(disparity->image, disparity->image, 3);
 
   publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_,
                    GRAY_SCALE);
 
   // Just remove the borders, probably overkill
-  disparity->image = cropMat(disparity->image, 0, 40, 30, 10);
+  disparity->image = cropMat(disparity->image, 0, 0, 0, 0);
 
   publishWithColor(msg, disparity->image, grad_pub_, RAINBOW_WITH_BLACK);
 
@@ -218,17 +225,17 @@ int DepthMapFusion::blackToWhite(int dist1, int dist2, int score1, int score2) {
 
 int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2,
                                int grad1, int grad2) {
-  int thres = 100;
+  int thres = 180;
   int tooClose = 230;
 
   float relative_diff = float(dist1) / float(dist2);
 
-  if (score1 < score2 && score1 < thres && dist1 < tooClose) {
+  if (score1 < score2 && score1 < thres && dist1 < tooClose && dist1!=0 && dist2!=0) {
     return dist1;
-  } else if (score2 < score1 && score2 < thres && dist2 < tooClose) {
+  } else if (score2 < score1 && score2 < thres && dist2 < tooClose && dist1!=0 && dist2!=0) {
     return dist2;
   } else if (0.8 < relative_diff && relative_diff < 1.25 &&
-             score1 < 1.25 * thres && score2 < 1.25 * thres) {
+             score1 < 1.25 * thres && score2 < 1.25 * thres && dist1!=0 && dist2!=0) {
     return float(dist1 + dist2) / 2.0;
   }
   return 0;
