@@ -45,21 +45,25 @@ namespace depth_map_fusion {
 // Callbacks
 void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cv::Mat rot_mat = rotateMat(disparity->image);
-  cropped_depth_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
- // cropped_depth_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
-
+  cropped_depth_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+  for (int i = 0; i < cropped_depth_1_.rows; ++i) {
+    for (int j = 0; j < cropped_depth_1_.cols; ++j) {
+	cropped_depth_1_.at<unsigned char>(i, j) = ((cropped_depth_1_.at<unsigned char>(i, j))&0xF8);
+    }
+  }
   publishWithColor(msg, cropped_depth_1_, cropped_depth_1_pub_,
                    RAINBOW_WITH_BLACK);
 }
 
 void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  //cv::Mat rot_mat = rotateMat(disparity->image);
-  //cropped_depth_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
-  cropped_depth_2_ = cropToSquare(disparity->image, offset_x_, offset_y_);
-
-
+  cv::Mat rot_mat = rotateMat(disparity->image);
+  cropped_depth_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  for (int i = 0; i < cropped_depth_2_.rows; ++i) {
+    for (int j = 0; j < cropped_depth_2_.cols; ++j) {
+	cropped_depth_2_.at<unsigned char>(i, j) = ((cropped_depth_2_.at<unsigned char>(i, j))&0xF8);
+    }
+  }
   publishWithColor(msg, cropped_depth_2_, cropped_depth_2_pub_,
                    RAINBOW_WITH_BLACK);
   publishFusedDepthMap(msg);
@@ -67,15 +71,17 @@ void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  //cropped_score_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
-  cv::Mat rot_mat = rotateMat(disparity->image);
-  cropped_score_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
-
+  cropped_score_1_ = cropToSquare(disparity->image, offset_x_, offset_y_);
+  for (int i = 0; i < cropped_score_1_.rows; ++i) {
+    for (int j = 0; j < cropped_score_1_.cols; ++j) {
+	cropped_score_1_.at<unsigned char>(i, j) = ((cropped_score_1_.at<unsigned char>(i, j))&0x07) * 32;
+    }
+  }
   // cropped_score_1_grad_ should eventually have high values around horizontal
   // lines
   cv::GaussianBlur(cropped_score_1_, cropped_score_1_grad_, cv::Size(13, 13),
                    3.0);
-  cv::Sobel(cropped_score_1_grad_, cropped_score_1_grad_, -1, 2, 0, 7, 0.03);
+  cv::Sobel(cropped_score_1_grad_, cropped_score_1_grad_, -1, 0, 2, 7, 0.03);
   threshold(cropped_score_1_grad_, cropped_score_1_grad_, 30, 255, 0);
   cv::GaussianBlur(cropped_score_1_grad_, cropped_score_1_grad_,
                    cv::Size(21, 21), 10.0);
@@ -87,15 +93,18 @@ void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  //cv::Mat rot_mat = rotateMat(disparity->image);
-  //cropped_score_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
-  cropped_score_2_ = cropToSquare(disparity->image, offset_x_, offset_y_);
-
+  cv::Mat rot_mat = rotateMat(disparity->image);
+  cropped_score_2_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
+  for (int i = 0; i < cropped_score_2_.rows; ++i) {
+    for (int j = 0; j < cropped_score_2_.cols; ++j) {
+	cropped_score_2_.at<unsigned char>(i, j) = ((cropped_score_2_.at<unsigned char>(i, j))&0x07) * 32;
+    }
+  }
   // cropped_score_2_grad_ should eventually have high values around vertical
   // lines
   cv::GaussianBlur(cropped_score_2_, cropped_score_2_grad_, cv::Size(13, 13),
                    3.0);
-  cv::Sobel(cropped_score_2_grad_, cropped_score_2_grad_, -1, 0, 2, 7, 0.03);
+  cv::Sobel(cropped_score_2_grad_, cropped_score_2_grad_, -1, 2, 0, 7, 0.03);
   threshold(cropped_score_2_grad_, cropped_score_2_grad_, 30, 255, 0);
   cv::GaussianBlur(cropped_score_2_grad_, cropped_score_2_grad_,
                    cv::Size(21, 21), 10.0);
@@ -225,7 +234,7 @@ int DepthMapFusion::blackToWhite(int dist1, int dist2, int score1, int score2) {
 
 int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2,
                                int grad1, int grad2) {
-  int thres = 180;
+  int thres = 280;
   int tooClose = 230;
 
   float relative_diff = float(dist1) / float(dist2);
@@ -275,7 +284,7 @@ cv::Mat DepthMapFusion::cropToSquare(const cv::Mat &mat, int offset_x,
 cv::Mat DepthMapFusion::rotateMat(const cv::Mat &mat) {
   cv::Mat rot_mat;
   cv::transpose(mat, rot_mat);
-  cv::flip(rot_mat, rot_mat, 1);
+  cv::flip(rot_mat, rot_mat, 0);
   return rot_mat;
 }
 
