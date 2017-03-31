@@ -47,7 +47,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/contrib/contrib.hpp>
+// #include <opencv2/contrib/contrib.hpp>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -73,16 +73,26 @@ class DepthMapFusion {
   ros::Publisher cropped_depth_2_pub_;
   ros::Publisher cropped_score_1_pub_;
   ros::Publisher cropped_score_2_pub_;
+  ros::Publisher cropped_depth_1_second_pub_;
+  ros::Publisher cropped_depth_2_second_pub_;
+  ros::Publisher cropped_score_1_second_pub_;
+  ros::Publisher cropped_score_2_second_pub_;
   ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
 
   cv::Mat cropped_depth_1_;
   cv::Mat cropped_depth_2_;
+  cv::Mat cropped_depth_combined_;
   cv::Mat cropped_score_1_;
   cv::Mat cropped_score_2_;
   cv::Mat cropped_score_combined_;
   cv::Mat cropped_score_1_grad_;
   cv::Mat cropped_score_2_grad_;
+
+  cv::Mat cropped_depth_1_second_;
+  cv::Mat cropped_score_1_second_;
+  cv::Mat cropped_depth_2_second_;
+  cv::Mat cropped_score_2_second_;
 
   std::deque<int> previous_errors_;
   int RAINBOW_WITH_BLACK = -1;
@@ -111,6 +121,16 @@ class DepthMapFusion {
         nh_.advertise<sensor_msgs::Image>("/cropped_score_1", 5);
     cropped_score_2_pub_ =
         nh_.advertise<sensor_msgs::Image>("/cropped_score_2", 5);
+
+    cropped_depth_1_second_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_depth_1_second", 5);
+    cropped_depth_2_second_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_depth_2_second", 5);
+    cropped_score_1_second_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_score_1_second", 5);
+    cropped_score_2_second_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_score_2_second", 5);
+
     fused_pub_ = nh_.advertise<sensor_msgs::Image>("/fused_depth_map", 5);
     cropped_score_combined_pub_ =
         nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
