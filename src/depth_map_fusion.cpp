@@ -110,11 +110,10 @@ void DepthMapFusion::publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg)
       cropped_score_combined_.at<unsigned char>(i, j) = combined_confidence;
     }
   }
-  //cv::medianBlur(disparity->image, disparity->image, 3);
+  // cv::medianBlur(cropped_depth_combined_, cropped_depth_combined_, 3);
 
-
-  publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_, GRAY_SCALE);
   publishWithColor(msg, cropped_depth_combined_, grad_pub_, RAINBOW_WITH_BLACK);
+  publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_, GRAY_SCALE);
 
   sensor_msgs::Image fused_image;
   disparity->toImageMsg(fused_image);
@@ -161,8 +160,8 @@ int DepthMapFusion::getFusedDistance(int i, int j) {
   // score1 = dist1 ^ 7;
   // score2 = dist2 ^ 7;
 
-  score1 -= cropped_score_1_second_.at<unsigned char>(i, j);
-  score2 -= cropped_score_2_second_.at<unsigned char>(i, j);
+  score1 = 100 - (cropped_score_1_second_.at<unsigned char>(i, j) - score1);
+  score2 = 100 - (cropped_score_2_second_.at<unsigned char>(i, j) - score2);
 
   // Choose which fusion function to use
   return gradFilter(dist1, dist2, score1, score2, grad1, grad2);
