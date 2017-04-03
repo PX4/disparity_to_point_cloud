@@ -77,6 +77,9 @@ class DepthMapFusion {
   ros::Publisher cropped_depth_2_second_pub_;
   ros::Publisher cropped_score_1_second_pub_;
   ros::Publisher cropped_score_2_second_pub_;
+
+  ros::Publisher cropped_score_1_diff_pub_;
+  ros::Publisher cropped_score_2_diff_pub_;
   ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
 
@@ -131,6 +134,11 @@ class DepthMapFusion {
     cropped_score_2_second_pub_ =
         nh_.advertise<sensor_msgs::Image>("/cropped_score_2_second", 5);
 
+    cropped_score_1_diff_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_score_1_diff", 5);
+    cropped_score_2_diff_pub_ =
+        nh_.advertise<sensor_msgs::Image>("/cropped_score_2_diff", 5);
+
     fused_pub_ = nh_.advertise<sensor_msgs::Image>("/fused_depth_map", 5);
     cropped_score_combined_pub_ =
         nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
@@ -151,6 +159,7 @@ class DepthMapFusion {
 
   void publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg);
 
+  int splitToDepthAndScore(cv::Mat &depth, cv::Mat &score);
   int getFusedDistance(int i, int j);
   int weightedAverage(int dist1, int dist2, int score1, int score2);
   int maxDist(int dist1, int dist2, int score1, int score2);
