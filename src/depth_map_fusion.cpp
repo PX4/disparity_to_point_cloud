@@ -46,6 +46,7 @@ namespace depth_map_fusion {
 void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cv::Mat rot_mat = rotateMat(disparity->image);
+  rect2 = disparity->image.clone();
   cropped_depth_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
 
   splitToDepthAndScore(cropped_depth_1_, cropped_score_1_);
@@ -67,6 +68,7 @@ void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
 
 void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
+  rect1 = disparity->image.clone();
   cv::Mat rot_mat = rotateMat(disparity->image);
   cropped_depth_1_second_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
   
@@ -86,6 +88,28 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   publishWithColor(msg, cropped_score_2_second_, cropped_score_2_second_pub_, GRAY_SCALE);  
  
   publishFusedDepthMap(msg);
+
+  cv::Mat disp;
+  int block_size = 3;
+  auto sgbm = cv::StereoSGBM::create(0, 16, block_size * block_size);
+  sgbm->setP1(8 * block_size * block_size);
+  sgbm->setP2(32 * block_size * block_size);
+  sgbm->setMinDisparity(0);
+  sgbm->setNumDisparities(16);
+  sgbm->setUniquenessRatio(50);
+  sgbm->setSpeckleWindowSize(0);
+  sgbm->setSpeckleRange(100);
+  sgbm->setMode(cv::StereoSGBM::MODE_SGBM);
+  sgbm->compute(rect2, rect1, disp);
+  cv::Mat output;
+  disp.convertTo(output, CV_8U);
+  publishWithColor(msg, output, stereoSGBM_pub_, RAINBOW_WITH_BLACK, "mono8");
+
+  // cv_bridge::CvImage out_msg;
+  // out_msg.header = msg->header;
+  // out_msg.encoding = "mono8";
+  // out_msg.image = output;
+  // stereoSGBM_pub_.publish(out_msg.toImageMsg());
 }
 
 // Fuses together the last depthmaps and publishes
@@ -283,12 +307,13 @@ cv::Mat DepthMapFusion::rotateMat(const cv::Mat &mat) {
 void DepthMapFusion::publishWithColor(const sensor_msgs::ImageConstPtr &msg,
                                       const cv::Mat &mat,
                                       const ros::Publisher &publisher,
-                                      int colormap) {
+                                      int colormap,
+                                      std::string encoding) {
   if (colormap == GRAY_SCALE) {
     // publish original mat
     cv_bridge::CvImage out_msg;
     out_msg.header = msg->header;
-    out_msg.encoding = "mono8";
+    out_msg.encoding = encoding;
     out_msg.image = mat;
     publisher.publish(out_msg.toImageMsg());
     return;

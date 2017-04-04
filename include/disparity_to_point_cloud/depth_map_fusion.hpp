@@ -43,6 +43,8 @@
 
 #include <deque>
 #include <numeric>
+#include <string>
+
 
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
@@ -82,6 +84,7 @@ class DepthMapFusion {
   ros::Publisher cropped_score_2_diff_pub_;
   ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
+  ros::Publisher stereoSGBM_pub_;
 
   cv::Mat cropped_depth_1_;
   cv::Mat cropped_depth_2_;
@@ -96,6 +99,9 @@ class DepthMapFusion {
   cv::Mat cropped_score_1_second_;
   cv::Mat cropped_depth_2_second_;
   cv::Mat cropped_score_2_second_;
+
+  cv::Mat rect1;
+  cv::Mat rect2;
 
   std::deque<int> previous_errors_;
   int RAINBOW_WITH_BLACK = -1;
@@ -143,6 +149,7 @@ class DepthMapFusion {
     cropped_score_combined_pub_ =
         nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
     grad_pub_ = nh_.advertise<sensor_msgs::Image>("/gradient", 5);
+    stereoSGBM_pub_ = nh_.advertise<sensor_msgs::Image>("/stereoSGBM", 5);
 
     if (!nh_.getParam("offset_x", offset_x_)) {
       ROS_WARN("Failed to load parameter offset_x");
@@ -178,7 +185,7 @@ class DepthMapFusion {
 
   void publishWithColor(const sensor_msgs::ImageConstPtr &msg,
                         const cv::Mat &mat, const ros::Publisher &publisher,
-                        int colormap);
+                        int colormap, std::string encoding = "mono8");
 
   void colorizeDepth(const cv::Mat &gray, cv::Mat &rgb);
 };
