@@ -125,6 +125,13 @@ void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
   disp.convertTo(output, CV_8U);
   publishWithColor(msg, output, stereoBM_pub_, RAINBOW_WITH_BLACK, "mono8");
 
+  cv::Mat out = cv::Mat::zeros(rect2.size(), rect2.type());
+  rect2(cv::Rect(0,1, rect2.cols,rect2.rows-1)).copyTo(out(cv::Rect(0,0,rect2.cols,rect2.rows-1)));
+  rect2 = out;
+  sbm->compute(rect2, rect1, disp);
+  minMaxLoc( disp, &minVal, &maxVal );
+  disp.convertTo(output, CV_8U);
+  publishWithColor(msg, output, stereoBM_fixed_pub_, RAINBOW_WITH_BLACK, "mono8");
 }
 
 // Fuses together the last depthmaps and publishes
