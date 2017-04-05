@@ -85,6 +85,7 @@ class DepthMapFusion {
   ros::Publisher cropped_score_combined_pub_;
   ros::Publisher grad_pub_;
   ros::Publisher stereoSGBM_pub_;
+  ros::Publisher stereoBM_pub_;
 
   cv::Mat cropped_depth_1_;
   cv::Mat cropped_depth_2_;
@@ -150,6 +151,7 @@ class DepthMapFusion {
         nh_.advertise<sensor_msgs::Image>("/combined_score", 5);
     grad_pub_ = nh_.advertise<sensor_msgs::Image>("/gradient", 5);
     stereoSGBM_pub_ = nh_.advertise<sensor_msgs::Image>("/stereoSGBM", 5);
+    stereoBM_pub_ = nh_.advertise<sensor_msgs::Image>("/stereoBM", 5);
 
     if (!nh_.getParam("offset_x", offset_x_)) {
       ROS_WARN("Failed to load parameter offset_x");

@@ -95,6 +95,9 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
 void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat disp;
   int block_size = 3;
+  double minVal; double maxVal;
+  cv::Mat output;
+
   auto sgbm = cv::StereoSGBM::create(0, 16, block_size * block_size);
   sgbm->setP1(8 * block_size * block_size);
   sgbm->setP2(32 * block_size * block_size);
@@ -105,9 +108,23 @@ void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
   sgbm->setSpeckleRange(100);
   sgbm->setMode(cv::StereoSGBM::MODE_SGBM);
   sgbm->compute(rect2, rect1, disp);
-  cv::Mat output;
+  minMaxLoc( disp, &minVal, &maxVal );
+  // std::cout << "StereSGBM (min, max): " << minVal << " " << maxVal << std::endl;
   disp.convertTo(output, CV_8U);
+  // imgDisparity16S.convertTo( imgDisparity8U, CV_8UC1, 255/(maxVal - minVal));
   publishWithColor(msg, output, stereoSGBM_pub_, RAINBOW_WITH_BLACK, "mono8");
+
+  auto sbm = cv::StereoBM::create(0, 21);
+  sbm->setMinDisparity(0);
+  sbm->setNumDisparities(16);
+  sbm->setUniquenessRatio(10);
+  sbm->setSpeckleWindowSize(1);
+  sbm->setSpeckleRange(100);
+  sbm->compute(rect2, rect1, disp);
+  minMaxLoc( disp, &minVal, &maxVal );
+  disp.convertTo(output, CV_8U);
+  publishWithColor(msg, output, stereoBM_pub_, RAINBOW_WITH_BLACK, "mono8");
+
 }
 
 // Fuses together the last depthmaps and publishes
