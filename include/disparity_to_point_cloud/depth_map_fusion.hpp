@@ -164,6 +164,7 @@ class DepthMapFusion {
   void MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg);
   void MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg);
 
+  void publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg);
   void publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg);
 
   int splitToDepthAndScore(cv::Mat &depth, cv::Mat &score);

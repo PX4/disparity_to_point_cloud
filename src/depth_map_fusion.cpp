@@ -89,6 +89,10 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
  
   publishFusedDepthMap(msg);
 
+  publishStereoSGBM(msg);
+}
+
+void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat disp;
   int block_size = 3;
   auto sgbm = cv::StereoSGBM::create(0, 16, block_size * block_size);
@@ -104,12 +108,6 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat output;
   disp.convertTo(output, CV_8U);
   publishWithColor(msg, output, stereoSGBM_pub_, RAINBOW_WITH_BLACK, "mono8");
-
-  // cv_bridge::CvImage out_msg;
-  // out_msg.header = msg->header;
-  // out_msg.encoding = "mono8";
-  // out_msg.image = output;
-  // stereoSGBM_pub_.publish(out_msg.toImageMsg());
 }
 
 // Fuses together the last depthmaps and publishes
