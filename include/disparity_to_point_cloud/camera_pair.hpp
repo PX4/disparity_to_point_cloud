@@ -31,26 +31,72 @@
  *
  ****************************************************************************/
 /**
- * @file depth_map_fusion_node.cpp
+ * @file depth_map_fusion.hpp
  *
- * Node which start the fusion class
+ * Class for a camera pair from uvc_ros_driver
  *
  * @author Vilhjálmur Vilhjálmsson <villi@px4.io>
  */
 
-#include "disparity_to_point_cloud/depth_map_fusion.hpp"
-#include "disparity_to_point_cloud/camera_triplet.hpp"
+#ifndef __CAMERA_PAIR_HPP__
+#define __CAMERA_PAIR_HPP__
 
+#include <deque>
+#include <numeric>
+#include <string>
+
+
+#include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
-int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "depth_map_fusion");
-  // depth_map_fusion::DepthMapFusion depth_map_fusion;
-  ros::NodeHandle nh("~");
-  depth_map_fusion::CameraTriplet left_triplet(nh, 0);
-  depth_map_fusion::CameraTriplet right_triplet(nh, 4);
+#include <disparity_to_point_cloud/common.h>
 
-  // Endless loop
-  ros::spin();
-  return 0;
-}
+namespace depth_map_fusion {
+
+// Forward declare CameraTriplet because of the parent pointer
+class CameraTriplet;
+
+class CameraPair {
+ public:
+  CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet, std::string id, bool rotation);
+
+  // Normal callback, image contains depth and score 
+  void bestCallback(const sensor_msgs::ImageConstPtr &msg);
+
+  // 'Second-best' callback, image contains depth and score of second best match
+  void secCallback(const sensor_msgs::ImageConstPtr &msg);
+  
+  // Same as bestCallback, secCallback
+  void imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_best);
+
+  // Informs the parent-pointer that an image was received
+  void informParent(const sensor_msgs::ImageConstPtr &msg);
+
+  bool is_rotated;
+  std::vector<ros::Time> timestamps;
+  cv::Mat depth_best_mat;
+  cv::Mat score_best_mat;
+  cv::Mat depth_sec_mat;
+  cv::Mat score_sec_mat;
+  ros::Subscriber depth_score_best_sub;
+  ros::Subscriber depth_score_sec_sub;
+  ros::Publisher depth_best_pub;
+  ros::Publisher depth_sec_pub;
+  ros::Publisher score_best_pub;
+  ros::Publisher score_sec_pub;
+  CameraTriplet *parent;
+};
+
+}  // depth_map_fusion
+
+#endif  // __CAMERA_PAIR_HPP__

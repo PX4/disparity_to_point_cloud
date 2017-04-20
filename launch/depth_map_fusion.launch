@@ -5,7 +5,7 @@
     <remap to="/uvc_camera/cam_2/image_rect" from="/matching_score_2"/>
     <remap to="/uvc_camera/cam_2/image_depth" from="/disparity_2"/>
 
-    <param name="offset_x" value="0" />
-    <param name="offset_y" value="0" />
+    <param name="offset_x" value="-5" />
+    <param name="offset_y" value="-5" />
   </node>
 </launch>

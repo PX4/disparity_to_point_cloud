@@ -31,26 +31,41 @@
  *
  ****************************************************************************/
 /**
- * @file depth_map_fusion_node.cpp
+ * @file depth_map_fusion.hpp
  *
- * Node which start the fusion class
+ * Class that creates two CamerPair's and publishes a fused depthmap
  *
  * @author Vilhjálmur Vilhjálmsson <villi@px4.io>
  */
 
-#include "disparity_to_point_cloud/depth_map_fusion.hpp"
-#include "disparity_to_point_cloud/camera_triplet.hpp"
+#ifndef __CAMERA_TRIPLET_HPP__
+#define __CAMERA_TRIPLET_HPP__
 
-#include <ros/ros.h>
+#include <disparity_to_point_cloud/camera_pair.hpp>
+#include <disparity_to_point_cloud/score_functions.hpp>
 
-int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "depth_map_fusion");
-  // depth_map_fusion::DepthMapFusion depth_map_fusion;
-  ros::NodeHandle nh("~");
-  depth_map_fusion::CameraTriplet left_triplet(nh, 0);
-  depth_map_fusion::CameraTriplet right_triplet(nh, 4);
+namespace depth_map_fusion {
 
-  // Endless loop
-  ros::spin();
-  return 0;
-}
+class CameraTriplet {
+ public:
+  CameraTriplet(ros::NodeHandle &nh, int id_);
+
+  // A pair received an image, if all images have that same timestamp, fuse them together
+  void fuseIfPossible(const sensor_msgs::ImageConstPtr &msg);
+
+  // Fuses the depthmaps from hor_pair and ver_pair, and publishes the result
+  void fusePairs(const sensor_msgs::ImageConstPtr &msg);
+
+  // Returns the fused depth and score for pixel (i,j)
+  DepthScore getFusedPixel(int i, int j);
+
+  int id;
+  CameraPair hor_pair;
+  CameraPair ver_pair;
+  ros::Publisher fused_depth_pub;
+  ros::Publisher fused_score_pub;
+};
+
+}  // depth_map_fusion
+
+#endif  // __CAMERA_TRIPLET_HPP__

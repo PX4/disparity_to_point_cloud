@@ -130,6 +130,8 @@ add_library(disparity_to_point_cloud
 )
 add_library(depth_map_fusion
   src/depth_map_fusion.cpp
+  src/camera_triplet.cpp
+  src/camera_pair.cpp
 )
 target_link_libraries(disparity_to_point_cloud
   ${PCL_LIBRARIES}

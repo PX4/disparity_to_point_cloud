@@ -60,6 +60,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <disparity_to_point_cloud/common.h>
+
 namespace depth_map_fusion {
 
 class DepthMapFusion {
@@ -106,8 +108,6 @@ class DepthMapFusion {
   cv::Mat rect2;
 
   std::deque<int> previous_errors_;
-  int RAINBOW_WITH_BLACK = -1;
-  int GRAY_SCALE = -2;
 
  public:
   int offset_x_ = 0;
@@ -171,7 +171,6 @@ class DepthMapFusion {
   void publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg);
   void publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg);
 
-  int splitToDepthAndScore(cv::Mat &depth, cv::Mat &score);
   int getFusedDistance(int i, int j);
   int weightedAverage(int dist1, int dist2, int score1, int score2);
   int maxDist(int dist1, int dist2, int score1, int score2);
@@ -181,18 +180,8 @@ class DepthMapFusion {
   int onlyGoodAvg(int dist1, int dist2, int score1, int score2);
   int overlap(int dist1, int dist2, int score1, int score2);
   int blackToWhite(int dist1, int dist2, int score1, int score2);
-  int gradFilter(int dist1, int dist2, int score1, int score2, int grad1,
-                 int grad2);
+  int gradFilter(int dist1, int dist2, int score1, int score2, int grad1, int grad2);
 
-  cv::Mat cropMat(const cv::Mat &mat, int left, int right, int top, int bottom);
-  cv::Mat cropToSquare(const cv::Mat &mat, int offset_x = 0, int offset_y = 0);
-  cv::Mat rotateMat(const cv::Mat &mat);
-
-  void publishWithColor(const sensor_msgs::ImageConstPtr &msg,
-                        const cv::Mat &mat, const ros::Publisher &publisher,
-                        int colormap, std::string encoding = "mono8");
-
-  void colorizeDepth(const cv::Mat &gray, cv::Mat &rgb);
 };
 
 }  // depth_map_fusion

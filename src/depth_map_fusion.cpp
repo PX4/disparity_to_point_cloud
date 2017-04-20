@@ -49,7 +49,7 @@ void DepthMapFusion::DisparityCb1(const sensor_msgs::ImageConstPtr &msg) {
   rect2 = disparity->image.clone();
   cropped_depth_1_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
 
-  splitToDepthAndScore(cropped_depth_1_, cropped_score_1_);
+  moveScoreFromDepth(cropped_depth_1_, cropped_score_1_);
 
   publishWithColor(msg, cropped_depth_1_, cropped_depth_1_pub_,
                    RAINBOW_WITH_BLACK);
@@ -60,7 +60,7 @@ void DepthMapFusion::DisparityCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cropped_depth_2_ = cropToSquare(disparity->image, offset_x_, offset_y_);
 
-  splitToDepthAndScore(cropped_depth_2_, cropped_score_2_);
+  moveScoreFromDepth(cropped_depth_2_, cropped_score_2_);
 
   publishWithColor(msg, cropped_depth_2_, cropped_depth_2_pub_, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_2_, cropped_score_2_pub_, GRAY_SCALE);
@@ -72,7 +72,7 @@ void DepthMapFusion::MatchingScoreCb1(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat rot_mat = rotateMat(disparity->image);
   cropped_depth_1_second_ = cropToSquare(rot_mat, -offset_x_, -offset_y_);
   
-  splitToDepthAndScore(cropped_depth_1_second_, cropped_score_1_second_);
+  moveScoreFromDepth(cropped_depth_1_second_, cropped_score_1_second_);
 
   publishWithColor(msg, cropped_depth_1_second_, cropped_depth_1_second_pub_, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_1_second_, cropped_score_1_second_pub_, GRAY_SCALE);  
@@ -82,14 +82,14 @@ void DepthMapFusion::MatchingScoreCb2(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cropped_depth_2_second_ = cropToSquare(disparity->image, offset_x_, offset_y_);
   
-  splitToDepthAndScore(cropped_depth_2_second_, cropped_score_2_second_);
+  moveScoreFromDepth(cropped_depth_2_second_, cropped_score_2_second_);
 
   publishWithColor(msg, cropped_depth_2_second_, cropped_depth_2_second_pub_, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_2_second_, cropped_score_2_second_pub_, GRAY_SCALE);  
  
   publishFusedDepthMap(msg);
 
-  publishStereoSGBM(msg);
+  // publishStereoSGBM(msg);
 }
 
 void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
@@ -125,9 +125,9 @@ void DepthMapFusion::publishStereoSGBM(const sensor_msgs::ImageConstPtr &msg) {
   disp.convertTo(output, CV_8U);
   publishWithColor(msg, output, stereoBM_pub_, RAINBOW_WITH_BLACK, "mono8");
 
-  cv::Mat out = cv::Mat::zeros(rect2.size(), rect2.type());
-  rect2(cv::Rect(0,1, rect2.cols,rect2.rows-1)).copyTo(out(cv::Rect(0,0,rect2.cols,rect2.rows-1)));
-  rect2 = out;
+  // cv::Mat out = cv::Mat::zeros(rect2.size(), rect2.type());
+  // rect2(cv::Rect(0,1, rect2.cols,rect2.rows-1)).copyTo(out(cv::Rect(0,0,rect2.cols,rect2.rows-1)));
+  // rect2 = out;
   sbm->compute(rect2, rect1, disp);
   minMaxLoc( disp, &minVal, &maxVal );
   disp.convertTo(output, CV_8U);
@@ -156,7 +156,7 @@ void DepthMapFusion::publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg)
       cropped_score_combined_.at<unsigned char>(i, j) = combined_confidence;
     }
   }
-  // cv::medianBlur(cropped_depth_combined_, cropped_depth_combined_, 3);
+  cv::medianBlur(cropped_depth_combined_, cropped_depth_combined_, 5);
 
   publishWithColor(msg, cropped_depth_combined_, grad_pub_, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_combined_, cropped_score_combined_pub_, GRAY_SCALE);
@@ -179,21 +179,6 @@ void DepthMapFusion::publishFusedDepthMap(const sensor_msgs::ImageConstPtr &msg)
   // }
 }
 
-
-// The last 3 of the disparity image encode the score of each pixel
-// The function copys the last 3 bits of each value in depth to score,
-// and sets them to zero in score.
-// Also scales score to values in [0,100]
-int DepthMapFusion::splitToDepthAndScore(cv::Mat &depth, cv::Mat &score) {
-  if (score.size() != depth.size()) {
-    score = depth.clone();
-  }
-
-  cv::bitwise_and(depth, 7, score);     // Now score contains the last 3 bits of depth  
-  cv::bitwise_and(depth, 255-7, depth); // Set the last 3 bits of depth to zero
-  score *= 14;                          // Scale to ca. 0-100
-}
-
 // Returns the fused depth for pixel (i,j)
 int DepthMapFusion::getFusedDistance(int i, int j) {
   int dist1 = cropped_depth_1_.at<unsigned char>(i, j);
@@ -206,8 +191,8 @@ int DepthMapFusion::getFusedDistance(int i, int j) {
   // score1 = dist1 ^ 7;
   // score2 = dist2 ^ 7;
 
-  score1 = 100 - (cropped_score_1_second_.at<unsigned char>(i, j) - score1);
-  score2 = 100 - (cropped_score_2_second_.at<unsigned char>(i, j) - score2);
+  score1 = 100 - (cropped_score_2_second_.at<unsigned char>(i, j) - score1);
+  score2 = 100 - (cropped_score_1_second_.at<unsigned char>(i, j) - score2);
 
   // Choose which fusion function to use
   return gradFilter(dist1, dist2, score1, score2, grad1, grad2);
@@ -286,130 +271,6 @@ int DepthMapFusion::gradFilter(int dist1, int dist2, int score1, int score2,
     return float(dist1 + dist2) / 2.0;
   }
   return 0;
-}
-
-cv::Mat DepthMapFusion::cropMat(const cv::Mat &mat, int left, int right,
-                                int top, int bottom) {
-  int num_cols = mat.cols - left - right;
-  int num_rows = mat.rows - top - bottom;
-  cv::Rect region = cv::Rect(left, top, num_cols, num_rows);
-  return mat(region);
-}
-
-// Returns a new square matrix, which is the center of mat
-// Shrinks the larger dimension of mat until it is square
-cv::Mat DepthMapFusion::cropToSquare(const cv::Mat &mat, int offset_x,
-                                     int offset_y) {
-  cv::Rect region;
-  int num_cols = mat.cols - std::abs(offset_x);
-  int num_rows = mat.rows - std::abs(offset_y);
-  int n = std::min(mat.cols, mat.rows) -
-          std::max(std::abs(offset_x), std::abs(offset_y_));
-
-  if (num_cols < num_rows) {
-    int start_col = std::max(0, offset_x);
-    int start_row = std::max(0, offset_y + (num_rows - num_cols) / 2);
-    region = cv::Rect(start_col, start_row, n, n);
-  } else {
-    int start_col = std::max(0, offset_x + (num_cols - num_rows) / 2);
-    int start_row = std::max(0, offset_y);
-    region = cv::Rect(start_col, start_row, n, n);
-  }
-  return mat(region);
-}
-
-// Rotate mat 90 deg clockwise
-cv::Mat DepthMapFusion::rotateMat(const cv::Mat &mat) {
-  cv::Mat rot_mat;
-  cv::transpose(mat, rot_mat);
-  cv::flip(rot_mat, rot_mat, 1);
-  return rot_mat;
-}
-
-void DepthMapFusion::publishWithColor(const sensor_msgs::ImageConstPtr &msg,
-                                      const cv::Mat &mat,
-                                      const ros::Publisher &publisher,
-                                      int colormap,
-                                      std::string encoding) {
-  if (colormap == GRAY_SCALE) {
-    // publish original mat
-    cv_bridge::CvImage out_msg;
-    out_msg.header = msg->header;
-    out_msg.encoding = encoding;
-    out_msg.image = mat;
-    publisher.publish(out_msg.toImageMsg());
-    return;
-  }
-
-  cv::Mat colored_mat;
-  if (colormap == RAINBOW_WITH_BLACK) {
-    colorizeDepth(mat, colored_mat);
-  } else {
-    cv::applyColorMap(mat, colored_mat, colormap);
-  }
-
-  cv_bridge::CvImage out_msg;
-  out_msg.header = msg->header;
-  out_msg.encoding = "rgb8";
-  out_msg.image = colored_mat;
-
-  publisher.publish(out_msg.toImageMsg());
-}
-
-// Colorizes gray scale from blue to red, whithout changing black pixels
-void DepthMapFusion::colorizeDepth(const cv::Mat &gray, cv::Mat &rgb) {
-  double maxDisp = 255;
-  float S = 1.f;
-  float V = 1.f;
-
-  rgb.create(gray.size(), CV_8UC3);
-  rgb = cv::Scalar::all(0);
-
-  if (maxDisp < 1) return;
-
-  for (int y = 0; y < gray.rows; y++) {
-    for (int x = 0; x < gray.cols; x++) {
-      unsigned char d = 40 + 0.8 * gray.at<unsigned char>(y, x);
-      unsigned int H =
-          255 - ((unsigned char)maxDisp - d) * 280 / (unsigned char)maxDisp;
-      unsigned int hi = (H / 60) % 6;
-
-      float f = H / 60.f - H / 60;
-      float p = V * (1 - S);
-      float q = V * (1 - f * S);
-      float t = V * (1 - (1 - f) * S);
-
-      cv::Point3f res;
-
-      if (hi == 0)  // R = V,  G = t,  B = p
-        res = cv::Point3f(p, t, V);
-      if (hi == 1)  // R = q, G = V,  B = p
-        res = cv::Point3f(p, V, q);
-      if (hi == 2)  // R = p, G = V,  B = t
-        res = cv::Point3f(t, V, p);
-      if (hi == 3)  // R = p, G = q,  B = V
-        res = cv::Point3f(V, q, p);
-      if (hi == 4)  // R = t, G = p,  B = V
-        res = cv::Point3f(V, p, t);
-      if (hi == 5)  // R = V, G = p,  B = q
-        res = cv::Point3f(q, p, V);
-
-      unsigned char b =
-          (unsigned char)(std::max(0.f, std::min(res.x, 1.f)) * 255.f);
-      unsigned char g =
-          (unsigned char)(std::max(0.f, std::min(res.y, 1.f)) * 255.f);
-      unsigned char r =
-          (unsigned char)(std::max(0.f, std::min(res.z, 1.f)) * 255.f);
-
-      rgb.at<cv::Point3_<unsigned char> >(y, x) =
-          cv::Point3_<unsigned char>(b, g, r);
-
-      if (d == 40) {
-        rgb.at<cv::Point3_<unsigned char> >(y, x) =
-            cv::Point3_<unsigned char>(0, 0, 0);
-      }
-    }
-  }
 }
 
 // void erode() {
