@@ -1,6 +1,22 @@
 #ifndef __COMMON_HPP__
 #define __COMMON_HPP__
 
+
+
+#include <cv_bridge/cv_bridge.h>
+#include <ros/ros.h>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/contrib/contrib.hpp>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 namespace depth_map_fusion {
 
 const int RAINBOW_WITH_BLACK = -1;
@@ -16,7 +32,7 @@ struct DepthScore {
 // and sets them to zero in score.
 // Also scales score to values in [0,100]
 inline
-int moveScoreFromDepth(cv::Mat &depth, cv::Mat &score) {
+void moveScoreFromDepth(cv::Mat &depth, cv::Mat &score) {
   // if (score.size() != depth.size()) {
   score = depth.clone();
   // }
@@ -29,7 +45,7 @@ int moveScoreFromDepth(cv::Mat &depth, cv::Mat &score) {
 
 // Rotate mat 90 deg
 inline
-cv::Mat rotateMat(const cv::Mat &mat, bool clockwise=false) {
+cv::Mat rotateMat(const cv::Mat &mat, bool clockwise=true) {
   cv::Mat rot_mat;
   cv::transpose(mat, rot_mat);
   int axis = clockwise ? 1 : 0;
