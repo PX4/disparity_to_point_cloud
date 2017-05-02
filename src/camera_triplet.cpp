@@ -76,7 +76,7 @@ void CameraTriplet::fusePairs(const sensor_msgs::ImageConstPtr &msg) {
       cropped_score_combined.at<unsigned char>(i, j) = depth_score.score;
     }
   }
-  cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
+  // cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 7);
 
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
@@ -89,8 +89,8 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   int height = ver_pair.depth_best_mat.rows;
   int long_width  = hor_pair.depth_best_mat.cols;
   int short_width = ver_pair.depth_best_mat.cols;
-  int i2 = i + 20;    // Alignment hack
-  int j2 = j - ((long_width - short_width) / 2);
+  int i2 = i - 5;    // Alignment hack
+  int j2 = j + 10 - ((long_width - short_width) / 2);
   if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
     return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
   }
@@ -103,7 +103,9 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   DepthScore ver_sec = {ver_pair.depth_sec_mat.at<unsigned char>(i2, j2), 
                         ver_pair.score_sec_mat.at<unsigned char>(i2, j2)};
 
+  // return betterScore(hor_best, hor_sec, ver_best, ver_sec);
   return secondBestInv2(hor_best, hor_sec, ver_best, ver_sec);
+  // return alwaysVer(hor_best, hor_sec, ver_best, ver_sec);
 }
 
 }  // depth_map_fusion

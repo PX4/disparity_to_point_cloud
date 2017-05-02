@@ -77,14 +77,14 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cv::Mat depth = disparity->image.clone();
   cv::Mat score;
+  depth = cropToSquare(depth);
   if (is_rotated) {
-    depth = cropToSquare(depth);
     depth = rotateMat(depth);
   }
   
   moveScoreFromDepth(depth, score);
   // cv::medianBlur(depth, depth, 5);
-  // cv::medianBlur(score, score, 5);
+  cv::medianBlur(score, score, 15);
 
   if (is_best) {
     timestamps[0] = msg->header.stamp;
