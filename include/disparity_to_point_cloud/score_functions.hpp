@@ -7,12 +7,21 @@ namespace depth_map_fusion {
 
 // Returns the (depth,score) from the better pair
 inline
-DepthScore betterScore(int dist1, int dist2, int score1, int score2) {
-  if (score1 < score2) {
+DepthScore betterScore(DepthScore hor_best, DepthScore hor_sec,
+                       DepthScore ver_best, DepthScore ver_sec) {
+
+  if (hor_best.score <= ver_best.score) {
     // A small score is better
-    return {dist1, score1};
+    return hor_best;
   }
-  return {dist2, score2};
+  return ver_best;
+}
+
+inline
+DepthScore alwaysVer(DepthScore hor_best, DepthScore hor_sec,
+                     DepthScore ver_best, DepthScore ver_sec) {
+
+  return ver_best;
 }
 
 // Same as betterScore, uses the second-best from the other pair to get a new score 
