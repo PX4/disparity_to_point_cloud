@@ -2,10 +2,11 @@
 #define __SCORE_FUNCTIONS_HPP__
 
 #include <disparity_to_point_cloud/common.h>
+#include <assert.h>
 
 namespace depth_map_fusion {
 
-// Returns the (depth,score) from the better pair
+// Returns the better pair
 inline
 DepthScore betterScore(DepthScore hor_best, DepthScore hor_sec,
                        DepthScore ver_best, DepthScore ver_sec) {
@@ -17,6 +18,18 @@ DepthScore betterScore(DepthScore hor_best, DepthScore hor_sec,
   return ver_best;
 }
 
+// Returns the pair with the lower depth
+inline
+DepthScore lowerDepth(DepthScore hor_best, DepthScore hor_sec,
+                      DepthScore ver_best, DepthScore ver_sec) {
+
+  if (hor_best.depth >= ver_best.depth) {
+    return hor_best;
+  }
+  return ver_best;
+}
+
+// Returns the vertical pair
 inline
 DepthScore alwaysVer(DepthScore hor_best, DepthScore hor_sec,
                      DepthScore ver_best, DepthScore ver_sec) {
@@ -24,15 +37,14 @@ DepthScore alwaysVer(DepthScore hor_best, DepthScore hor_sec,
   return ver_best;
 }
 
-// Same as betterScore, uses the second-best from the other pair to get a new score 
+// Same as betterScore, but uses the second-best score as well
 inline
-DepthScore secondBestInv(DepthScore hor_best, DepthScore hor_sec,
-                         DepthScore ver_best, DepthScore ver_sec) {
+DepthScore secondBest(DepthScore hor_best, DepthScore hor_sec,
+                      DepthScore ver_best, DepthScore ver_sec) {
 
-  int hor_score = 100 - (ver_sec.score - hor_best.score);
-  int ver_score = 100 - (hor_sec.score - ver_best.score);
+  int hor_score = 100 - (hor_sec.score - hor_best.score);
+  int ver_score = 100 - (ver_sec.score - ver_best.score);
   if (hor_score < ver_score) {
-    // A small score is better
     return {hor_best.depth, hor_score};
   }
   return {ver_best.depth, ver_score};
@@ -40,24 +52,49 @@ DepthScore secondBestInv(DepthScore hor_best, DepthScore hor_sec,
 
 // Same as secondBestInv, but with some slight hack 
 inline
-DepthScore secondBestInv2(DepthScore hor_best, DepthScore hor_sec,
-                          DepthScore ver_best, DepthScore ver_sec) {
-  int thres = 180;
+DepthScore secondBest2(DepthScore hor_best, DepthScore hor_sec,
+                       DepthScore ver_best, DepthScore ver_sec) {
+  int thres = 60;
   int tooClose = 230;
-  int hor_score = 100 - (ver_sec.score - hor_best.score);
-  int ver_score = 100 - (hor_sec.score - ver_best.score);
+  int hor_score = 100 - (hor_sec.score - hor_best.score);
+  int ver_score = 100 - (ver_sec.score - ver_best.score);
+
+  assert(hor_score >= 0 && ver_score >= 0);
 
   float relative_diff = float(hor_best.depth) / float(ver_best.depth);
 
-  if (hor_score < ver_score && hor_score < thres && hor_best.depth < tooClose && hor_best.depth!=0 && ver_best.depth!=0) {
+  if (hor_score < ver_score && hor_score < thres && hor_best.depth < tooClose && hor_best.depth!=0) {
     return hor_best;
   } 
-  else if (ver_score < hor_score && ver_score < thres && ver_best.depth < tooClose && hor_best.depth!=0 && ver_best.depth!=0) {
+  else if (ver_score < hor_score && ver_score < thres && ver_best.depth < tooClose && ver_best.depth!=0) {
     return ver_best;
   } 
-  else if (0.8 < relative_diff && relative_diff < 1.25 && hor_score < 1.25 * thres 
-          && ver_score < 1.25 * thres && hor_best.depth!=0 && ver_best.depth!=0) {
+  else if (0.67 < relative_diff && relative_diff < 1.5) {
     
+    return {(hor_best.depth + ver_best.depth) / 2, (hor_best.score + ver_best.score) / 2};
+  }
+  return {0, hor_best.score};
+}
+
+// Returns an average of the two pairs if they roughly agree on the depth
+inline
+DepthScore onlyGoodOnes(DepthScore hor_best, DepthScore hor_sec,
+                        DepthScore ver_best, DepthScore ver_sec) {
+
+  int thres = 180;
+  int tooClose = 230;
+  int hor_score = hor_best.score;
+  int ver_score = ver_best.score;
+
+  float relative_diff = float(hor_best.depth) / float(ver_best.depth);
+
+  // if (hor_score < ver_score && hor_score < thres && hor_best.depth < tooClose && hor_best.depth!=0 && ver_best.depth!=0) {
+  //   return hor_best;
+  // } 
+  // else if (ver_score < hor_score && ver_score < thres && ver_best.depth < tooClose && hor_best.depth!=0 && ver_best.depth!=0) {
+  //   return ver_best;
+  // } 
+  if (0.5 < relative_diff && relative_diff < 2.0) {
     return {(hor_best.depth + ver_best.depth) / 2, (hor_best.score + ver_best.score) / 2};
   }
   return {0, hor_best.score};

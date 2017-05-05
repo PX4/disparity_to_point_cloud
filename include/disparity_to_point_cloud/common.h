@@ -6,7 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/contrib/contrib.hpp>
+// #include <opencv2/contrib/contrib.hpp>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

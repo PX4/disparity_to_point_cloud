@@ -94,6 +94,7 @@ class CameraPair {
   ros::Publisher depth_sec_pub;
   ros::Publisher score_best_pub;
   ros::Publisher score_sec_pub;
+  ros::Publisher score_sub_pub;
   CameraTriplet *parent;
 };
 

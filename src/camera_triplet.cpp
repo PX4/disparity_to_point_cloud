@@ -49,7 +49,9 @@ CameraTriplet::CameraTriplet(ros::NodeHandle &nh, int id_)
   std::string id_str = std::to_string(id_);
 
   fused_depth_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_" + id_str, 1);
+  fused_depth_raw_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_raw_" + id_str, 1);
   fused_score_pub = nh.advertise<sensor_msgs::Image>("/fused_score_" + id_str, 1);
+  fused_score_raw_pub = nh.advertise<sensor_msgs::Image>("/fused_score_raw_" + id_str, 1);
 }
 
 
@@ -76,10 +78,16 @@ void CameraTriplet::fusePairs(const sensor_msgs::ImageConstPtr &msg) {
       cropped_score_combined.at<unsigned char>(i, j) = depth_score.score;
     }
   }
-  // cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 7);
+  
+  publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
+  
+  cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
 
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
+  publishWithColor(msg, 100 - (hor_pair.score_sec_mat - hor_pair.score_best_mat), hor_pair.score_sub_pub, GRAY_SCALE);
+  publishWithColor(msg, 100 - (ver_pair.score_sec_mat - ver_pair.score_best_mat), ver_pair.score_sub_pub, GRAY_SCALE);
+
 }
 
 
@@ -90,7 +98,7 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   int long_width  = hor_pair.depth_best_mat.cols;
   int short_width = ver_pair.depth_best_mat.cols;
   int i2 = i - 5;    // Alignment hack
-  int j2 = j + 10 - ((long_width - short_width) / 2);
+  int j2 = j + 5 - ((long_width - short_width) / 2); // moves to the left
   if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
     return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
   }
@@ -103,9 +111,16 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   DepthScore ver_sec = {ver_pair.depth_sec_mat.at<unsigned char>(i2, j2), 
                         ver_pair.score_sec_mat.at<unsigned char>(i2, j2)};
 
+  if (hor_score > hor_sec.score) {
+    return {0, 255};
+  }
   // return betterScore(hor_best, hor_sec, ver_best, ver_sec);
-  return secondBestInv2(hor_best, hor_sec, ver_best, ver_sec);
+  // return lowerDepth(hor_best, hor_sec, ver_best, ver_sec);
+  // return secondBestInv2(hor_best, hor_sec, ver_best, ver_sec);
+  // return secondBest(hor_best, hor_sec, ver_best, ver_sec);
+  return secondBest2(hor_best, hor_sec, ver_best, ver_sec);
   // return alwaysVer(hor_best, hor_sec, ver_best, ver_sec);
+  // return onlyGoodOnes(hor_best, hor_sec, ver_best, ver_sec);
 }
 
 }  // depth_map_fusion

@@ -60,6 +60,7 @@ CameraPair::CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet,
   score_best_pub = nh.advertise<sensor_msgs::Image>("/score_" + id, 1);
   depth_sec_pub = nh.advertise<sensor_msgs::Image>("/depth_sec_" + id, 1);
   score_sec_pub = nh.advertise<sensor_msgs::Image>("/score_sec_" + id, 1);
+  score_sub_pub = nh.advertise<sensor_msgs::Image>("/score_sub_" + id, 1);
 }
 
 
@@ -79,12 +80,12 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
   cv::Mat score;
   depth = cropToSquare(depth);
   if (is_rotated) {
-    depth = rotateMat(depth);
+    depth = rotateMat(depth, false);
   }
   
   moveScoreFromDepth(depth, score);
   // cv::medianBlur(depth, depth, 5);
-  cv::medianBlur(score, score, 15);
+  // cv::medianBlur(score, score, 15);
 
   if (is_best) {
     timestamps[0] = msg->header.stamp;
