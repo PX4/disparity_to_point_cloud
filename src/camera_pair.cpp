@@ -61,6 +61,8 @@ CameraPair::CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet,
   depth_sec_pub = nh.advertise<sensor_msgs::Image>("/depth_sec_" + id, 1);
   score_sec_pub = nh.advertise<sensor_msgs::Image>("/score_sec_" + id, 1);
   score_sub_pub = nh.advertise<sensor_msgs::Image>("/score_sub_" + id, 1);
+  score_line_pub = nh.advertise<sensor_msgs::Image>("/score_line_" + id, 1);
+  score_fused_pub = nh.advertise<sensor_msgs::Image>("/score_fused_" + id, 1);
 }
 
 
@@ -91,6 +93,7 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
     timestamps[0] = msg->header.stamp;
     depth_best_mat = depth.clone();
     score_best_mat = score.clone();
+
     publishWithColor(msg, depth_best_mat, depth_best_pub, RAINBOW_WITH_BLACK);
     publishWithColor(msg, score_best_mat, score_best_pub, GRAY_SCALE);
   }
@@ -103,6 +106,27 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
   }
 
   informParent(msg);
+}
+
+void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
+  score_sub_mat = 100 - (score_sec_mat - score_best_mat);
+
+  score_line_mat = score_best_mat.clone();
+  if (is_rotated) {
+    lineDetection(score_line_mat, 2, 0);
+  }
+  else {
+    lineDetection(score_line_mat, 0, 2);
+  }
+  score_line_mat = score_best_mat + 2 * score_line_mat;
+
+  score_fused_mat = (score_sub_mat + score_line_mat) / 2;
+  // cv::medianBlur(hor_pair.score_fused_mat, hor_pair.score_fused_mat, 5);
+  
+  publishWithColor(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
+  publishWithColor(msg, score_line_mat, score_line_pub, GRAY_SCALE);
+  publishWithColor(msg, score_fused_mat, score_fused_pub, GRAY_SCALE);
+
 }
 
 

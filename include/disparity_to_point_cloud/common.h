@@ -85,6 +85,14 @@ cv::Mat cropToSquare(const cv::Mat &mat, int offset_x=0, int offset_y=0) {
   return mat(region);
 }
 
+inline
+void lineDetection(cv::Mat &mat, int x_axis=0, int y_axis=2) {
+  cv::GaussianBlur(mat, mat, cv::Size(13, 13), 3.0);
+  cv::Sobel(mat, mat, -1, x_axis, y_axis, 7, 0.03);
+  threshold(mat, mat, 30, 255, 0);
+  cv::GaussianBlur(mat, mat, cv::Size(21, 21), 10.0);
+}
+
 
 // Colorizes gray scale from blue to red, whithout changing black pixels
 inline

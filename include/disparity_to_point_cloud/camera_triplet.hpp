@@ -54,7 +54,7 @@ class CameraTriplet {
   void fuseIfPossible(const sensor_msgs::ImageConstPtr &msg);
 
   // Fuses the depthmaps from hor_pair and ver_pair, and publishes the result
-  void fusePairs(const sensor_msgs::ImageConstPtr &msg);
+  void fuseTriplet(const sensor_msgs::ImageConstPtr &msg);
 
   // Returns the fused depth and score for pixel (i,j)
   DepthScore getFusedPixel(int i, int j);

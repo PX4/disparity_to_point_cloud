@@ -79,6 +79,8 @@ class CameraPair {
   // Same as bestCallback, secCallback
   void imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_best);
 
+  void fusePair(const sensor_msgs::ImageConstPtr &msg);
+
   // Informs the parent-pointer that an image was received
   void informParent(const sensor_msgs::ImageConstPtr &msg);
 
@@ -88,6 +90,9 @@ class CameraPair {
   cv::Mat score_best_mat;
   cv::Mat depth_sec_mat;
   cv::Mat score_sec_mat;
+  cv::Mat score_sub_mat;
+  cv::Mat score_line_mat;
+  cv::Mat score_fused_mat;
   ros::Subscriber depth_score_best_sub;
   ros::Subscriber depth_score_sec_sub;
   ros::Publisher depth_best_pub;
@@ -95,6 +100,8 @@ class CameraPair {
   ros::Publisher score_best_pub;
   ros::Publisher score_sec_pub;
   ros::Publisher score_sub_pub;
+  ros::Publisher score_line_pub;
+  ros::Publisher score_fused_pub;
   CameraTriplet *parent;
 };
 
