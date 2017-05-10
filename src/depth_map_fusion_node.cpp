@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   // depth_map_fusion::DepthMapFusion depth_map_fusion;
   ros::NodeHandle nh("~");
   depth_map_fusion::CameraTriplet left_triplet(nh, 0);
-  depth_map_fusion::CameraTriplet right_triplet(nh, 4);
+  // depth_map_fusion::CameraTriplet right_triplet(nh, 4);
 
   // Endless loop
   ros::spin();

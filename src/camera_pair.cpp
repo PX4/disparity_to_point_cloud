@@ -95,14 +95,14 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
     score_best_mat = score.clone();
 
     publishWithColor(msg, depth_best_mat, depth_best_pub, RAINBOW_WITH_BLACK);
-    publishWithColor(msg, score_best_mat, score_best_pub, GRAY_SCALE);
+    //publishWithColor(msg, score_best_mat, score_best_pub, GRAY_SCALE);
   }
   else {
     timestamps[1] = msg->header.stamp;
     depth_sec_mat = depth.clone();
     score_sec_mat = score.clone();
-    publishWithColor(msg, depth_sec_mat, depth_sec_pub, RAINBOW_WITH_BLACK);
-    publishWithColor(msg, score_sec_mat, score_sec_pub, GRAY_SCALE);
+    //publishWithColor(msg, depth_sec_mat, depth_sec_pub, RAINBOW_WITH_BLACK);
+    //publishWithColor(msg, score_sec_mat, score_sec_pub, GRAY_SCALE);
   }
 
   informParent(msg);
@@ -123,9 +123,9 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
   score_fused_mat = (score_sub_mat + score_line_mat) / 2;
   // cv::medianBlur(hor_pair.score_fused_mat, hor_pair.score_fused_mat, 5);
   
-  publishWithColor(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
-  publishWithColor(msg, score_line_mat, score_line_pub, GRAY_SCALE);
-  publishWithColor(msg, score_fused_mat, score_fused_pub, GRAY_SCALE);
+  //publishWithColor(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
+  //publishWithColor(msg, score_line_mat, score_line_pub, GRAY_SCALE);
+  //publishWithColor(msg, score_fused_mat, score_fused_pub, GRAY_SCALE);
 
 }
 

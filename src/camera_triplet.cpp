@@ -82,12 +82,13 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
     }
   }
   
-  publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
+  // publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
   
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
-
+  
+  printf("Fused \n");
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
-  publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
+  // publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }
 
 
