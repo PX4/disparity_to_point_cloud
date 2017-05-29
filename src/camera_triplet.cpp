@@ -82,12 +82,12 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
     }
   }
   
-  publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
-  
+  //publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
+  printf("fused\n");  
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
 
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
-  publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
+  //publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }
 
 
@@ -97,8 +97,10 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   int height = ver_pair.depth_best_mat.rows;
   int long_width  = hor_pair.depth_best_mat.cols;
   int short_width = ver_pair.depth_best_mat.cols;
-  int i2 = i - 5;    // Alignment hack
-  int j2 = j + 5 - ((long_width - short_width) / 2); // moves to the left
+  // int i2 = i - 5;    // Alignment hack
+  // int j2 = j + 5 - ((long_width - short_width) / 2); // moves to the left
+  int i2 = i + 5;    // Alignment hack
+  int j2 = j + 13 - ((long_width - short_width) / 2); // moves to the left
   if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
     return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
   }
@@ -111,9 +113,9 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   DepthScore ver_sec = {ver_pair.depth_sec_mat.at<unsigned char>(i2, j2), 
                         ver_pair.score_sec_mat.at<unsigned char>(i2, j2)};
 
-    // if (hor_score > hor_sec.score) {
-  //   return {0, 255};
-  // }
+  if (hor_score > hor_sec.score) {
+    return {0, 255};
+  }
   // return betterScore(hor_best, hor_sec, ver_best, ver_sec);
   // return lowerDepth(hor_best, hor_sec, ver_best, ver_sec);
   // return secondBestInv2(hor_best, hor_sec, ver_best, ver_sec);
@@ -121,7 +123,7 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   // return alwaysVer(hor_best, hor_sec, ver_best, ver_sec);
   // return onlyGoodOnes(hor_best, hor_sec, ver_best, ver_sec);
 
-  int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i2, j2);
+  int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i, j);
   int ver_fused_score = ver_pair.score_fused_mat.at<unsigned char>(i2, j2);
   return sobelFusion(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
 }

@@ -86,6 +86,11 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
   }
   
   moveScoreFromDepth(depth, score);
+
+  if (is_rotated) {
+    depth *= 2;
+  }
+
   // cv::medianBlur(depth, depth, 5);
   // cv::medianBlur(score, score, 15);
 
@@ -101,7 +106,7 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
     timestamps[1] = msg->header.stamp;
     depth_sec_mat = depth.clone();
     score_sec_mat = score.clone();
-    publishWithColor(msg, depth_sec_mat, depth_sec_pub, RAINBOW_WITH_BLACK);
+    //publishWithColor(msg, depth_sec_mat, depth_sec_pub, RAINBOW_WITH_BLACK);
     publishWithColor(msg, score_sec_mat, score_sec_pub, GRAY_SCALE);
   }
 
@@ -109,7 +114,7 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
 }
 
 void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
-  score_sub_mat = 100 - (score_sec_mat - score_best_mat);
+  score_sub_mat = 150 - (score_sec_mat - score_best_mat);
 
   score_line_mat = score_best_mat.clone();
   if (is_rotated) {
@@ -118,9 +123,9 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
   else {
     lineDetection(score_line_mat, 0, 2);
   }
-  score_line_mat = score_best_mat + 2 * score_line_mat;
+  //score_line_mat = score_best_mat + 2 * score_line_mat;
 
-  score_fused_mat = (score_sub_mat + score_line_mat) / 2;
+  score_fused_mat = (score_sub_mat + 2*score_line_mat) / 2;
   // cv::medianBlur(hor_pair.score_fused_mat, hor_pair.score_fused_mat, 5);
   
   publishWithColor(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);

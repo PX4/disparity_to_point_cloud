@@ -6,7 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <opencv2/calib3d/calib3d.hpp>
-// #include <opencv2/contrib/contrib.hpp>
+#include <opencv2/contrib/contrib.hpp>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -39,7 +39,8 @@ void moveScoreFromDepth(cv::Mat &depth, cv::Mat &score) {
 
   cv::bitwise_and(depth, 7, score);     // Now score contains the last 3 bits of depth  
   cv::bitwise_and(depth, 255-7, depth); // Set the last 3 bits of depth to zero
-  score *= 14;                          // Scale to ca. 0-100
+  // score *= 14;                          // Scale to ca. 0-100
+  score *= 56;                          // Scale to ca. 0-100
 }
 
 
