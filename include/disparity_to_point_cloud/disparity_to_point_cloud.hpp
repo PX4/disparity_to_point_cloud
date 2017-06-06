@@ -63,12 +63,19 @@ class Disparity2PCloud {
   ros::Publisher p_cloud_pub_;
   ros::Subscriber disparity_sub_;
   // TODO import this coefficeint with the calibration file or camera info topic
-  double fx_ = 714.24;
-  double fy_ = 713.5;
-  double cx_ = 376;
-  double cy_ = 240;
+  // double fx_ = 714.24;
+  // double fy_ = 713.5;
+  double fx_ = 710.2;
+  double fy_ = 709.63;
+
+  // double cx_ = 376;
+  // double cy_ = 240;
+  double cx_ = 353;
+  double cy_ = 216;
   // double base_line_ = 0.043; // odroid stereo
-  double base_line_ = 0.09;    // Omni-stereo
+  // double base_line_ = 0.09;    // Omni-stereo
+  double base_line_ = 0.068;    // Triplet
+  std::string camera_optical_frame_ ;
   cv::Mat Q_;
 
  public:
@@ -86,6 +93,7 @@ class Disparity2PCloud {
     nh_.param<double>("cx_", cx_, 376);
     nh_.param<double>("cy_", cy_, 240);
     nh_.param<double>("base_line_", base_line_, 0.09);
+    nh_.param<std::string>("camera_optical_frame_", camera_optical_frame_, "/camera_optical_frame");
 
     cv::Mat K = (cv::Mat_<double>(3, 3) << fx_, 0, cx_, 0, fy_, cy_, 0, 0, 1);
     cv::Mat distCoeff1 = (cv::Mat_<double>(5, 1) << 0.0, 0.0, 0.0, 0.0, 0.0);

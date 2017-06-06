@@ -86,8 +86,9 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   printf("fused\n");  
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
 
-  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
-  //publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
+  // publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
+  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
+  // publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }
 
 

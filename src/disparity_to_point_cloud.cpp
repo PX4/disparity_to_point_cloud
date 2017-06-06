@@ -67,9 +67,9 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   // cv::Mat medianFilterd = disparity->image;
 
   // form 40 to width-40 : to remove outlire on the border
-  for (int v = 40; v < s.height - 40; v++) {
+  for (int v = 40; v < s.height - 40; v+=2) {
     pv = image3D.ptr<cv::Vec3f>(v);
-    for (int u = 40; u < s.width - 40; u++) {
+    for (int u = 40; u < s.width - 40; u+=2) {
       cv::Vec3f value = pv[u];
       cloud->points.push_back(pcl::PointXYZ(value[0], value[1], value[2]));
     }
@@ -86,7 +86,7 @@ void Disparity2PCloud::DisparityCb(const sensor_msgs::ImageConstPtr &msg) {
   // does not work on the rosbag with the tf broadcaster for the camera position
   output.header.stamp = disparity->header.stamp;
   // TODO: create ros param for this
-  output.header.frame_id = "/camera_optical_frame";
+  output.header.frame_id = camera_optical_frame_;
   p_cloud_pub_.publish(output);
   printf("publish\n");
 }
