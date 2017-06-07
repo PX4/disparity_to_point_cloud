@@ -86,8 +86,8 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   printf("fused\n");  
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
 
-  // publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
-  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
+  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
+  // publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
   // publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }
 
@@ -102,9 +102,9 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   // int j2 = j + 5 - ((long_width - short_width) / 2); // moves to the left
   int i2 = i + 5;    // Alignment hack
   int j2 = j + 13 - ((long_width - short_width) / 2); // moves to the left
-  if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
-    return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
-  }
+  // if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
+  //   return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
+  // }
 
   DepthScore hor_best = {hor_dist, hor_score};
   DepthScore hor_sec = {hor_pair.depth_sec_mat.at<unsigned char>(i, j), 
@@ -126,7 +126,14 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
 
   int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i, j);
   int ver_fused_score = ver_pair.score_fused_mat.at<unsigned char>(i2, j2);
-  return sobelFusion(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
+  // return sobelFusion(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
+
+  if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
+    // return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
+    int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i, j);
+    return filterHor(hor_best.depth, hor_fused_score, 0, 0);
+  }
+  return filterHor(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
 }
 
 }  // depth_map_fusion

@@ -1,0 +1,20 @@
+<launch>
+  <node pkg="disparity_to_point_cloud" type="disparity_to_point_cloud_node" name="disparity_to_point_cloud" output="screen">
+    <remap to="/fused_depth_0" from="/disparity"/>
+    <remap to="/omi_cam/point_cloud" from="/point_cloud"/>
+  </node>
+
+  <node pkg="disparity_to_point_cloud" type="disparity_to_point_cloud_node" name="disparity_to_point_cloud_right" output="screen">
+    <remap to="/fused_depth_4" from="/disparity"/>
+    <remap to="/omi_cam/point_cloud" from="/point_cloud"/>
+    <param name="camera_optical_frame_" value="/camera_optical_frame_right" />
+  </node>
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="camera_tf_broadcaster" args="0 0 0 3.14 0 3.1415 stereo_cam::stereo_camera_link camera_optical_frame 10" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="camera_link_tf_broadcaster" args="0 0 0 0 0 0 world camera_optical_frame 10" /> -->
+  <!-- the triplets are rotated 25 deg -->
+  <node pkg="tf" type="static_transform_publisher" name="camera_tf_broadcaster" args="0 0 0 -1.1345 0 -1.57 camera_link camera_optical_frame 10" />
+  <node pkg="tf" type="static_transform_publisher" name="camera_tf_broadcaster_right" args="0 0 0 -2.0071 0 -1.57 camera_link camera_optical_frame_right 10" />
+
+  <!-- <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find disparity_to_point_cloud)/rviz/d2pc.rviz" /> -->
+</launch>

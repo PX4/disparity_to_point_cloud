@@ -80,8 +80,8 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
   cv::Mat depth = disparity->image.clone();
   cv::Mat score;
-  depth = cropToSquare(depth);
   if (is_rotated) {
+    depth = cropToSquare(depth);
     depth = rotateMat(depth, false);
   }
   
@@ -118,14 +118,15 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
 
   score_line_mat = score_best_mat.clone();
   if (is_rotated) {
-    lineDetection(score_line_mat, 2, 0);
+    // lineDetection(score_line_mat, 2, 0);
   }
   else {
-    lineDetection(score_line_mat, 0, 2);
+    // lineDetection(score_line_mat, 0, 2);
   }
   //score_line_mat = score_best_mat + 2 * score_line_mat;
 
-  score_fused_mat = (score_sub_mat + 2*score_line_mat) / 2;
+  // score_fused_mat = (score_sub_mat + 2*score_line_mat) / 2;
+  score_fused_mat = score_sub_mat;
   // cv::medianBlur(hor_pair.score_fused_mat, hor_pair.score_fused_mat, 5);
   
   publishWithColor(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);

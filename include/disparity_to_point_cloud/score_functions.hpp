@@ -103,7 +103,7 @@ DepthScore onlyGoodOnes(DepthScore hor_best, DepthScore hor_sec,
 inline
 DepthScore sobelFusion(int hor_depth, int hor_score,
                        int ver_depth, int ver_score) {
-  int thres = 60;
+  int thres = 10;
   int tooClose = 230;
 
   assert(hor_score >= 0 && ver_score >= 0);
@@ -116,11 +116,23 @@ DepthScore sobelFusion(int hor_depth, int hor_score,
   else if (ver_score < hor_score && ver_score < thres && ver_depth < tooClose && ver_depth!=0) {
     return {ver_depth, ver_score};
   } 
-  else if (0.67 < relative_diff && relative_diff < 1.5) {
+  else if (0.75 < relative_diff && relative_diff < 1.33) {
     
     return {(hor_depth + ver_depth) / 2, (hor_score + ver_score) / 2};
   }
   return {0, hor_score};
+}
+
+inline
+DepthScore filterHor(int hor_depth, int hor_score,
+                     int ver_depth, int ver_score) {
+  int thres = 70;
+  int tooClose = 230;
+
+  if (hor_score < thres && hor_depth < tooClose && hor_depth!=0) {
+    return {hor_depth, hor_score};
+  } 
+  return {0, 100};
 }
 
 } // depth_map_fusion
