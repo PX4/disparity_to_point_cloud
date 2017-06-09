@@ -57,11 +57,17 @@ int main(int argc, char *argv[]) {
   ros::NodeHandle nh("~");
 
   int base_id;
+  bool hor_line_detection, ver_line_detection;
   nh.param<int>("base_id", base_id, 0);
   nh.param<int>("threshold", depth_map_fusion::THRESHOLD, 20);
   nh.param<bool>("debug", depth_map_fusion::DEBUG, false);
+  nh.param<bool>("hor_line_detection", hor_line_detection, true);
+  nh.param<bool>("ver_line_detection", ver_line_detection, true);
 
-  depth_map_fusion::CameraTriplet triplet(nh, base_id);
+  depth_map_fusion::CameraTriplet triplet(nh,
+                                          base_id,
+                                          hor_line_detection,
+                                          ver_line_detection);
 
   // Endless loop
   ros::spin();

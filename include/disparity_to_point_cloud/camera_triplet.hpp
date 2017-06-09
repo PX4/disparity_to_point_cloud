@@ -48,7 +48,10 @@ namespace depth_map_fusion {
 
 class CameraTriplet {
  public:
-  CameraTriplet(ros::NodeHandle &nh, int id_);
+  CameraTriplet(ros::NodeHandle &nh,
+                int id_,
+                bool hor_line_detection=true,
+                bool ver_line_detection=true);
 
   // A pair received an image, if all images have that same timestamp, fuse them together
   void fuseIfPossible(const sensor_msgs::ImageConstPtr &msg);

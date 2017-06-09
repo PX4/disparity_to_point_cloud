@@ -68,7 +68,11 @@ class CameraTriplet;
 
 class CameraPair {
  public:
-  CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet, std::string id, bool rotation);
+  CameraPair(ros::NodeHandle &nh,
+             CameraTriplet *parent,
+             std::string id,
+             bool is_rotated=false,
+             bool line_detection=true);
 
   // Normal callback, image contains depth and score 
   void bestCallback(const sensor_msgs::ImageConstPtr &msg);
@@ -85,6 +89,7 @@ class CameraPair {
   void informParent(const sensor_msgs::ImageConstPtr &msg);
 
   bool is_rotated;
+  bool line_detection;
   std::vector<ros::Time> timestamps;
   cv::Mat depth_best_mat;
   cv::Mat score_best_mat;

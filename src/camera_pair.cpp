@@ -44,11 +44,17 @@
 
 namespace depth_map_fusion {
 
-CameraPair::CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet, 
-                       std::string id, bool rotation) {
+CameraPair::CameraPair(ros::NodeHandle &nh,
+                       CameraTriplet *parent,
+                       std::string id,
+                       bool is_rotated,
+                       bool line_detection)
+:
+  parent(parent),
+  is_rotated(is_rotated),
+  line_detection(line_detection)
+{
 
-  parent = parent_triplet;
-  is_rotated = rotation;
   // timestamps = std::vector<ros::Time>(2);
   timestamps = {ros::Time(), ros::Time()};
   std::string best_topic = "/uvc_camera/cam_" + id + "/image_depth";
@@ -67,7 +73,7 @@ CameraPair::CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet,
 
 
 void CameraPair::bestCallback(const sensor_msgs::ImageConstPtr &msg) {
-  imageCallback(msg, true);    
+  imageCallback(msg, true);
 }
 
 
@@ -84,7 +90,7 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
     depth = cropToSquare(depth);
     depth = rotateMat(depth, false);
   }
-  
+ 
   moveScoreFromDepth(depth, score);
 
   if (is_rotated) {
@@ -117,17 +123,19 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
   score_sub_mat = 150 - (score_sec_mat - score_best_mat);
 
   score_line_mat = score_best_mat.clone();
-  if (is_rotated) {
-    // lineDetection(score_line_mat, 2, 0);
-  }
-  else {
-    // lineDetection(score_line_mat, 0, 2);
+  if (lineDetection) {
+    if (is_rotated) {
+      lineDetection(score_line_mat, 2, 0);
+    }
+    else {
+      lineDetection(score_line_mat, 0, 2);
+    }
   }
 
   // score_comb_mat = (score_sub_mat + 2*score_line_mat) / 2;
   score_comb_mat = score_sub_mat;
   // cv::medianBlur(hor_pair.score_comb_mat, hor_pair.score_comb_mat, 5);
-  
+ 
   publishWithColorDebug(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
   publishWithColorDebug(msg, score_line_mat, score_line_pub, GRAY_SCALE);
   publishWithColorDebug(msg, score_comb_mat, score_comb_pub, GRAY_SCALE);
@@ -136,7 +144,7 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
 
 
 void CameraPair::informParent(const sensor_msgs::ImageConstPtr &msg) {
-  parent->fuseIfPossible(msg); 
+  parent->fuseIfPossible(msg);
 }
 
 }  // depth_map_fusion

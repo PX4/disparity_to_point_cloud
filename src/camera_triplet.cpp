@@ -42,10 +42,14 @@
 
 namespace depth_map_fusion {
 
-CameraTriplet::CameraTriplet(ros::NodeHandle &nh, int id_) 
-        : hor_pair(nh, this, std::to_string(id_),   false),
-          ver_pair(nh, this, std::to_string(id_+2), true) {
-
+CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
+                             int id_,
+                             bool hor_line_detection,
+                             bool ver_line_detection)
+: 
+  hor_pair(nh, this, std::to_string(id_),   false,  hor_line_detection),
+  ver_pair(nh, this, std::to_string(id_+2), true,   ver_line_detection)
+{
   std::string id_str = std::to_string(id_);
 
   fused_depth_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_" + id_str, 1);
