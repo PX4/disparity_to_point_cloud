@@ -125,16 +125,16 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   // return alwaysVer(hor_best, hor_sec, ver_best, ver_sec);
   // return onlyGoodOnes(hor_best, hor_sec, ver_best, ver_sec);
 
-  int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i, j);
-  int ver_fused_score = ver_pair.score_fused_mat.at<unsigned char>(i2, j2);
-  // return sobelFusion(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
+  int hor_comb_score = hor_pair.score_comb_mat.at<unsigned char>(i, j);
+  int ver_comb_score = ver_pair.score_comb_mat.at<unsigned char>(i2, j2);
+  // return sobelFusion(hor_best.depth, hor_comb_score, ver_best.depth, ver_comb_score);
 
   if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
     // return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
-    int hor_fused_score = hor_pair.score_fused_mat.at<unsigned char>(i, j);
-    return filterHor(hor_best.depth, hor_fused_score, 0, 0);
+    int hor_comb_score = hor_pair.score_comb_mat.at<unsigned char>(i, j);
+    return filterHor(hor_best.depth, hor_comb_score, 0, 0);
   }
-  return filterHor(hor_best.depth, hor_fused_score, ver_best.depth, ver_fused_score);
+  return filterHor(hor_best.depth, hor_comb_score, ver_best.depth, ver_comb_score);
 }
 
 }  // depth_map_fusion

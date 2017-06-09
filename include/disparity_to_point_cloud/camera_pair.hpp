@@ -92,7 +92,7 @@ class CameraPair {
   cv::Mat score_sec_mat;
   cv::Mat score_sub_mat;
   cv::Mat score_line_mat;
-  cv::Mat score_fused_mat;
+  cv::Mat score_comb_mat;
   ros::Subscriber depth_score_best_sub;
   ros::Subscriber depth_score_sec_sub;
   ros::Publisher depth_best_pub;
@@ -101,7 +101,7 @@ class CameraPair {
   ros::Publisher score_sec_pub;
   ros::Publisher score_sub_pub;
   ros::Publisher score_line_pub;
-  ros::Publisher score_fused_pub;
+  ros::Publisher score_comb_pub;
   CameraTriplet *parent;
 };
 

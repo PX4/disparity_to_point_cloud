@@ -62,7 +62,7 @@ CameraPair::CameraPair(ros::NodeHandle &nh, CameraTriplet *parent_triplet,
   score_sec_pub = nh.advertise<sensor_msgs::Image>("/score_sec_" + id, 1);
   score_sub_pub = nh.advertise<sensor_msgs::Image>("/score_sub_" + id, 1);
   score_line_pub = nh.advertise<sensor_msgs::Image>("/score_line_" + id, 1);
-  score_fused_pub = nh.advertise<sensor_msgs::Image>("/score_fused_" + id, 1);
+  score_comb_pub = nh.advertise<sensor_msgs::Image>("/score_comb_" + id, 1);
 }
 
 
@@ -124,13 +124,13 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
     // lineDetection(score_line_mat, 0, 2);
   }
 
-  // score_fused_mat = (score_sub_mat + 2*score_line_mat) / 2;
-  score_fused_mat = score_sub_mat;
-  // cv::medianBlur(hor_pair.score_fused_mat, hor_pair.score_fused_mat, 5);
+  // score_comb_mat = (score_sub_mat + 2*score_line_mat) / 2;
+  score_comb_mat = score_sub_mat;
+  // cv::medianBlur(hor_pair.score_comb_mat, hor_pair.score_comb_mat, 5);
   
   publishWithColorDebug(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
   publishWithColorDebug(msg, score_line_mat, score_line_pub, GRAY_SCALE);
-  publishWithColorDebug(msg, score_fused_mat, score_fused_pub, GRAY_SCALE);
+  publishWithColorDebug(msg, score_comb_mat, score_comb_pub, GRAY_SCALE);
 
 }
 
