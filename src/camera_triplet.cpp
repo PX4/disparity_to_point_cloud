@@ -49,6 +49,7 @@ CameraTriplet::CameraTriplet(ros::NodeHandle &nh, int id_)
   std::string id_str = std::to_string(id_);
 
   fused_depth_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_" + id_str, 1);
+  fused_depth_color_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_color_" + id_str, 1);
   fused_depth_raw_pub = nh.advertise<sensor_msgs::Image>("/fused_depth_raw_" + id_str, 1);
   fused_score_pub = nh.advertise<sensor_msgs::Image>("/fused_score_" + id_str, 1);
   fused_score_raw_pub = nh.advertise<sensor_msgs::Image>("/fused_score_raw_" + id_str, 1);
@@ -82,13 +83,13 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
     }
   }
   
-  //publishWithColor(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
+  publishWithColorDebug(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
   printf("fused\n");  
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
 
-  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, RAINBOW_WITH_BLACK);
-  // publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
-  // publishWithColor(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
+  publishWithColorDebug(msg, cropped_depth_combined, fused_depth_color_pub, RAINBOW_WITH_BLACK);
+  publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
+  publishWithColorDebug(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }
 
 

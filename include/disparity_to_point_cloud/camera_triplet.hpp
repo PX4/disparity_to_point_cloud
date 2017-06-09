@@ -63,6 +63,7 @@ class CameraTriplet {
   CameraPair hor_pair;
   CameraPair ver_pair;
   ros::Publisher fused_depth_pub;
+  ros::Publisher fused_depth_color_pub;
   ros::Publisher fused_depth_raw_pub;
   ros::Publisher fused_score_pub;
   ros::Publisher fused_score_raw_pub;

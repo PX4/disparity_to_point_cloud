@@ -21,6 +21,7 @@ namespace depth_map_fusion {
 
 const int RAINBOW_WITH_BLACK = -1;
 const int GRAY_SCALE = -2;
+const bool DEBUG = false;
 
 struct DepthScore {
   int depth;
@@ -184,6 +185,19 @@ void publishWithColor(const sensor_msgs::ImageConstPtr &msg,
   out_msg.image = colored_mat;
 
   publisher.publish(out_msg.toImageMsg());
+}
+
+
+// Only publishes in debug-mode
+inline
+void publishWithColorDebug(const sensor_msgs::ImageConstPtr &msg,
+                           const cv::Mat &mat,
+                           const ros::Publisher &publisher,
+                           int colormap,
+                           std::string encoding="mono8") {
+  if (DEBUG) {
+    publishWithColor(msg, mat, publisher, colormap, encoding);
+  }
 }
 
 } // depth_map_fusion
