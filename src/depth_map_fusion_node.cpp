@@ -47,8 +47,11 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, "depth_map_fusion");
   // depth_map_fusion::DepthMapFusion depth_map_fusion;
   ros::NodeHandle nh("~");
-  depth_map_fusion::CameraTriplet left_triplet(nh, 0);
-  depth_map_fusion::CameraTriplet right_triplet(nh, 4);
+
+  int base_id;
+  nh.param<int>("base_id", base_id, 0);
+
+  depth_map_fusion::CameraTriplet triplet(nh, base_id);
 
   // Endless loop
   ros::spin();

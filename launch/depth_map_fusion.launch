@@ -1,5 +1,7 @@
 <launch>
-  <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion" output="screen">
+  <arg name="base_id" default="0" />  <!-- id of the first camera in the triplet -->
+  
+  <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion_$(arg base_id)" output="screen">
     <remap to="/uvc_camera/cam_0/image_rect" from="/matching_score_1"/>
     <remap to="/uvc_camera/cam_0/image_depth" from="/disparity_1"/>
     <remap to="/uvc_camera/cam_2/image_rect" from="/matching_score_2"/>
@@ -7,5 +9,7 @@
 
     <param name="offset_x" value="-5" />
     <param name="offset_y" value="-5" />
+    <param name="base_id" value="$(arg base_id)" />
+
   </node>
 </launch>
