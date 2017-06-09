@@ -148,7 +148,7 @@ add_dependencies(disparity_to_point_cloud ${${PROJECT_NAME}_EXPORTED_TARGETS} ${
 add_dependencies(depth_map_fusion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(disparity_to_point_cloud_node src/disparity_to_point_cloud_node.cpp)
+# add_executable(disparity_to_point_cloud_node src/disparity_to_point_cloud_node.cpp)
 add_executable(depth_map_fusion_node src/depth_map_fusion_node.cpp)
 
 ## Add cmake target dependencies of the executable
@@ -156,12 +156,12 @@ add_executable(depth_map_fusion_node src/depth_map_fusion_node.cpp)
 # add_dependencies(disparity_to_point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(disparity_to_point_cloud_node
-  disparity_to_point_cloud
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${OpenCV_LIBS}
-)
+# target_link_libraries(disparity_to_point_cloud_node
+#   disparity_to_point_cloud
+#   ${catkin_LIBRARIES}
+#   ${PCL_LIBRARIES}
+#   ${OpenCV_LIBS}
+# )
 
 target_link_libraries(depth_map_fusion_node
   depth_map_fusion
