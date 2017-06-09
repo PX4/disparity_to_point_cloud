@@ -38,10 +38,18 @@
  * @author Vilhjálmur Vilhjálmsson <villi@px4.io>
  */
 
+#include <disparity_to_point_cloud/common.h>
 #include "disparity_to_point_cloud/depth_map_fusion.hpp"
 #include "disparity_to_point_cloud/camera_triplet.hpp"
 
 #include <ros/ros.h>
+
+namespace depth_map_fusion {
+	// Evil globals are set in this file to enable  
+	// easy reconfiguration without recompilation
+	bool DEBUG;
+	int THRESHOLD;
+}
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "depth_map_fusion");
@@ -50,6 +58,8 @@ int main(int argc, char *argv[]) {
 
   int base_id;
   nh.param<int>("base_id", base_id, 0);
+  nh.param<int>("threshold", depth_map_fusion::THRESHOLD, 20);
+  nh.param<bool>("debug", depth_map_fusion::DEBUG, false);
 
   depth_map_fusion::CameraTriplet triplet(nh, base_id);
 

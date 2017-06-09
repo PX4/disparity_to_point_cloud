@@ -5,6 +5,8 @@
 #include <assert.h>
 
 namespace depth_map_fusion {
+  extern int THRESHOLD; // Evil global set in depth_map_fusion_node
+
 
 // Returns the better pair
 inline
@@ -103,7 +105,7 @@ DepthScore onlyGoodOnes(DepthScore hor_best, DepthScore hor_sec,
 inline
 DepthScore sobelFusion(int hor_depth, int hor_score,
                        int ver_depth, int ver_score) {
-  int thres = 10;
+  int thres = THRESHOLD;
   int tooClose = 230;
 
   assert(hor_score >= 0 && ver_score >= 0);
@@ -126,7 +128,7 @@ DepthScore sobelFusion(int hor_depth, int hor_score,
 inline
 DepthScore filterHor(int hor_depth, int hor_score,
                      int ver_depth, int ver_score) {
-  int thres = 70;
+  int thres = THRESHOLD;
   int tooClose = 230;
 
   if (hor_score < thres && hor_depth < tooClose && hor_depth!=0) {

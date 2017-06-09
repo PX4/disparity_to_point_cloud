@@ -1,5 +1,7 @@
 <launch>
   <arg name="base_id" default="0" />  <!-- id of the first camera in the triplet -->
+  <arg name="debug" default="false" />  <!-- Publish debug images? -->
+  <arg name="threshold" default="20" />  <!-- Max cost for a pixel in the final depth-map -->
   
   <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion_$(arg base_id)" output="screen">
     <remap to="/uvc_camera/cam_0/image_rect" from="/matching_score_1"/>
@@ -10,6 +12,8 @@
     <param name="offset_x" value="-5" />
     <param name="offset_y" value="-5" />
     <param name="base_id" value="$(arg base_id)" />
+    <param name="debug" value="$(arg debug)" />
+    <param name="threshold" value="$(arg threshold)" />
 
   </node>
 </launch>

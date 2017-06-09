@@ -21,7 +21,7 @@ namespace depth_map_fusion {
 
 const int RAINBOW_WITH_BLACK = -1;
 const int GRAY_SCALE = -2;
-const bool DEBUG = false;
+extern bool DEBUG;    // Evil global set in depth_map_fusion_node
 
 struct DepthScore {
   int depth;
