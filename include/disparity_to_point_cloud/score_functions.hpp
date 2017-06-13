@@ -8,6 +8,7 @@ namespace depth_map_fusion {
 
 namespace dynamic_reconfiguration {
   extern int THRESHOLD; // Evil global set in depth_map_fusion_node
+  extern int TOO_CLOSE; // Evil global set in depth_map_fusion_node
 }
 
 // Returns the better pair
@@ -108,7 +109,7 @@ inline
 DepthScore sobelFusion(int hor_depth, int hor_score,
                        int ver_depth, int ver_score) {
   int thres = dynamic_reconfiguration::THRESHOLD;
-  int tooClose = 230;
+  int tooClose = dynamic_reconfiguration::TOO_CLOSE;
 
   assert(hor_score >= 0 && ver_score >= 0);
 
@@ -131,7 +132,7 @@ inline
 DepthScore filterHor(int hor_depth, int hor_score,
                      int ver_depth, int ver_score) {
   int thres = dynamic_reconfiguration::THRESHOLD;
-  int tooClose = 230;
+  int tooClose = dynamic_reconfiguration::TOO_CLOSE;
 
   if (hor_score < thres && hor_depth < tooClose && hor_depth!=0) {
     return {hor_depth, hor_score};

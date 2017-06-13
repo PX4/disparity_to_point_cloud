@@ -55,6 +55,9 @@ namespace dynamic_reconfiguration {
   bool DEBUG;
   bool LINE_DETECTION;
   int THRESHOLD;
+  int TOO_CLOSE;
+  int FINAL_BLUR;
+  int SCORE_MULT;
   int LINE_DET_WEIGHT;
   int SUB_MAT_MAX;
   int X_OFFSET;
@@ -64,6 +67,9 @@ namespace dynamic_reconfiguration {
     DEBUG           = config.debug;
     LINE_DETECTION  = config.line_detection;
     THRESHOLD       = config.threshold;
+    TOO_CLOSE       = config.too_close;
+    FINAL_BLUR      = config.final_blur;
+    SCORE_MULT      = config.score_multiplier;
     LINE_DET_WEIGHT = config.line_detection_weight;
     SUB_MAT_MAX     = config.sub_mat_max;
     X_OFFSET        = config.x_offset;

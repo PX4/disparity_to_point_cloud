@@ -44,6 +44,7 @@ namespace depth_map_fusion {
 
 namespace dynamic_reconfiguration {
   // Evil globals set in depth_map_fusion_node
+  extern int FINAL_BLUR;
   extern int X_OFFSET;
   extern int Y_OFFSET;
 }
@@ -82,8 +83,6 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat cropped_depth_combined(hor_pair.depth_best_mat.rows, hor_pair.depth_best_mat.cols, CV_8UC1);
   cv::Mat cropped_score_combined(hor_pair.score_best_mat.rows, hor_pair.score_best_mat.cols, CV_8UC1);
 
-
-
   hor_pair.fusePair(msg);
   // ver_pair.fusePair(msg);
 
@@ -97,8 +96,9 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   }
   
   publishWithColorDebug(msg, cropped_depth_combined, fused_depth_raw_pub, RAINBOW_WITH_BLACK);
-  printf("fused\n");  
-  cv::medianBlur(cropped_depth_combined, cropped_depth_combined, 5);
+  printf("fused\n");
+  int blur = 2 * (dynamic_reconfiguration::FINAL_BLUR / 2) + 1; // Must be odd
+  cv::medianBlur(cropped_depth_combined, cropped_depth_combined, blur);
 
   publishWithColorDebug(msg, cropped_depth_combined, fused_depth_color_pub, RAINBOW_WITH_BLACK);
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);

@@ -20,7 +20,9 @@
 namespace depth_map_fusion {
 
 namespace dynamic_reconfiguration {
-  extern bool DEBUG;    // Evil global set in depth_map_fusion_node
+  // Evil global set in depth_map_fusion_node
+  extern bool DEBUG;
+  extern int SCORE_MULT;
 }
 
 const int RAINBOW_WITH_BLACK = -1;
@@ -41,10 +43,9 @@ void moveScoreFromDepth(cv::Mat &depth, cv::Mat &score) {
   score = depth.clone();
   // }
 
-  cv::bitwise_and(depth, 7, score);     // Now score contains the last 3 bits of depth  
-  cv::bitwise_and(depth, 255-7, depth); // Set the last 3 bits of depth to zero
-  // score *= 14;                          // Scale to ca. 0-100
-  score *= 56;                          // Scale to ca. 0-100
+  cv::bitwise_and(depth, 7, score);               // Now score contains the last 3 bits of depth
+  cv::bitwise_and(depth, 255-7, depth);           // Set the last 3 bits of depth to zero
+  score *= dynamic_reconfiguration::SCORE_MULT;   // Scale to ca. 0-100
 }
 
 
