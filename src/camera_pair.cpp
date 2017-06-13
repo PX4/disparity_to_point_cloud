@@ -122,22 +122,23 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
 void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
   score_sub_mat = 150 - (score_sec_mat - score_best_mat);
 
-  score_line_mat = score_best_mat.clone();
-  if (lineDetection) {
+  if (line_detection) {
+    score_line_mat = score_best_mat.clone();
     if (is_rotated) {
       lineDetection(score_line_mat, 2, 0);
     }
     else {
       lineDetection(score_line_mat, 0, 2);
     }
+    score_comb_mat = (score_sub_mat + 2*score_line_mat) / 2;
   }
-
-  // score_comb_mat = (score_sub_mat + 2*score_line_mat) / 2;
-  score_comb_mat = score_sub_mat;
+  else {
+    score_comb_mat = score_sub_mat;
+  }
   // cv::medianBlur(hor_pair.score_comb_mat, hor_pair.score_comb_mat, 5);
  
-  publishWithColorDebug(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
   publishWithColorDebug(msg, score_line_mat, score_line_pub, GRAY_SCALE);
+  publishWithColorDebug(msg, score_sub_mat, score_sub_pub, GRAY_SCALE);
   publishWithColorDebug(msg, score_comb_mat, score_comb_pub, GRAY_SCALE);
 
 }

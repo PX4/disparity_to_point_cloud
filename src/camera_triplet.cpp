@@ -48,7 +48,7 @@ CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
                              bool ver_line_detection)
 : 
   hor_pair(nh, this, std::to_string(id_),   false,  hor_line_detection),
-  ver_pair(nh, this, std::to_string(id_+2), true,   ver_line_detection)
+  ver_pair(nh, this, std::to_string(id_+20), true,   ver_line_detection)
 {
   std::string id_str = std::to_string(id_);
 
@@ -61,10 +61,9 @@ CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
 
 
 void CameraTriplet::fuseIfPossible(const sensor_msgs::ImageConstPtr &msg) {
-  if (hor_pair.timestamps[0] == hor_pair.timestamps[1] &&
+  if (hor_pair.timestamps[0] == hor_pair.timestamps[1] /* &&
       hor_pair.timestamps[0] == ver_pair.timestamps[0] &&
-      hor_pair.timestamps[0] == ver_pair.timestamps[1]) {
-
+      hor_pair.timestamps[0] == ver_pair.timestamps[1]*/) {
     fuseTriplet(msg);
   }
 }
@@ -72,11 +71,15 @@ void CameraTriplet::fuseIfPossible(const sensor_msgs::ImageConstPtr &msg) {
 
 void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   cv_bridge::CvImagePtr disparity = cv_bridge::toCvCopy(*msg, "mono8");
-  cv::Mat cropped_depth_combined = hor_pair.depth_best_mat.clone();
-  cv::Mat cropped_score_combined = hor_pair.score_best_mat.clone();
+  // cv::Mat cropped_depth_combined = hor_pair.depth_best_mat.clone();
+  // cv::Mat cropped_score_combined = hor_pair.score_best_mat.clone();
+  cv::Mat cropped_depth_combined(hor_pair.depth_best_mat.rows, hor_pair.depth_best_mat.cols, CV_8UC1);
+  cv::Mat cropped_score_combined(hor_pair.score_best_mat.rows, hor_pair.score_best_mat.cols, CV_8UC1);
+
+
 
   hor_pair.fusePair(msg);
-  ver_pair.fusePair(msg);
+  // ver_pair.fusePair(msg);
 
   // For each pixel, calculate a new distance
   for (int i = 0; i < cropped_depth_combined.rows; ++i) {

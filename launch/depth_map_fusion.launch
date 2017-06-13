@@ -2,8 +2,8 @@
   <arg name="base_id" default="0" />  <!-- id of the first camera in the triplet -->
   <arg name="debug" default="false" />  <!-- Publish debug images? -->
   <arg name="threshold" default="20" />  <!-- Max cost for a pixel in the final depth-map -->
-  <arg name="hor_line_detection" default="true" />  <!-- Run horizontal line detection? -->
-  <arg name="ver_line_detection" default="true" />  <!-- Run vertical line detection? -->
+  <arg name="hor_line_detection" default="false" />  <!-- Run horizontal line detection? -->
+  <arg name="ver_line_detection" default="false" />  <!-- Run vertical line detection? -->
   
   <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion_$(arg base_id)" output="screen">
     <remap to="/uvc_camera/cam_0/image_rect" from="/matching_score_1"/>
