@@ -38,32 +38,59 @@
  * @author Vilhjálmur Vilhjálmsson <villi@px4.io>
  */
 
+#include <boost/bind.hpp>
+
+#include <dynamic_reconfigure/server.h>
+#include <ros/ros.h>
+
 #include <disparity_to_point_cloud/common.h>
 #include "disparity_to_point_cloud/depth_map_fusion.hpp"
 #include "disparity_to_point_cloud/camera_triplet.hpp"
-
-#include <ros/ros.h>
+#include "disparity_to_point_cloud/DepthMapFusionConfig.h"
 
 namespace depth_map_fusion {
-	// Evil globals are set in this file to enable  
-	// easy reconfiguration without recompilation
-	bool DEBUG;
-	int THRESHOLD;
-}
+namespace dynamic_reconfiguration {
+
+  // Evil globals are defined and modified here to enable easy dynamic reconfiguration
+  bool DEBUG;
+  bool LINE_DETECTION;
+  int THRESHOLD;
+  int LINE_DET_WEIGHT;
+  int SUB_MAT_MAX;
+  int X_OFFSET;
+  int Y_OFFSET;
+
+  void callback(DepthMapFusionConfig & config, uint32_t level) {
+    DEBUG           = config.debug;
+    LINE_DETECTION  = config.line_detection;
+    THRESHOLD       = config.threshold;
+    LINE_DET_WEIGHT = config.line_detection_weight;
+    SUB_MAT_MAX     = config.sub_mat_max;
+    X_OFFSET        = config.x_offset;
+    Y_OFFSET        = config.y_offset;
+  }
+
+} // dynamic_reconfiguration
+} // depth_map_fusion
+
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "depth_map_fusion");
-  // depth_map_fusion::DepthMapFusion depth_map_fusion;
   ros::NodeHandle nh("~");
 
+  // Set up Dynamic Reconfigure Server
+  dynamic_reconfigure::Server<depth_map_fusion::DepthMapFusionConfig> server;
+  auto f = boost::bind(&depth_map_fusion::dynamic_reconfiguration::callback, _1, _2);
+  server.setCallback(f);
+
+  // Get other parameters
   int base_id;
   bool hor_line_detection, ver_line_detection;
   nh.param<int>("base_id", base_id, 0);
-  nh.param<int>("threshold", depth_map_fusion::THRESHOLD, 20);
-  nh.param<bool>("debug", depth_map_fusion::DEBUG, false);
   nh.param<bool>("hor_line_detection", hor_line_detection, true);
   nh.param<bool>("ver_line_detection", ver_line_detection, true);
 
+  // Create a Camera Triplet
   depth_map_fusion::CameraTriplet triplet(nh,
                                           base_id,
                                           hor_line_detection,

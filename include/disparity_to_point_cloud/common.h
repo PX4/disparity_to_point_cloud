@@ -19,9 +19,12 @@
 
 namespace depth_map_fusion {
 
+namespace dynamic_reconfiguration {
+  extern bool DEBUG;    // Evil global set in depth_map_fusion_node
+}
+
 const int RAINBOW_WITH_BLACK = -1;
 const int GRAY_SCALE = -2;
-extern bool DEBUG;    // Evil global set in depth_map_fusion_node
 
 struct DepthScore {
   int depth;
@@ -195,7 +198,8 @@ void publishWithColorDebug(const sensor_msgs::ImageConstPtr &msg,
                            const ros::Publisher &publisher,
                            int colormap,
                            std::string encoding="mono8") {
-  if (DEBUG) {
+
+  if (dynamic_reconfiguration::DEBUG) {
     publishWithColor(msg, mat, publisher, colormap, encoding);
   }
 }

@@ -44,6 +44,13 @@
 
 namespace depth_map_fusion {
 
+namespace dynamic_reconfiguration {
+  // Evil globals set in depth_map_fusion_node
+  extern bool LINE_DETECTION;
+  extern int LINE_DET_WEIGHT;
+  extern int SUB_MAT_MAX;
+}
+
 CameraPair::CameraPair(ros::NodeHandle &nh,
                        CameraTriplet *parent,
                        std::string id,
@@ -120,9 +127,10 @@ void CameraPair::imageCallback(const sensor_msgs::ImageConstPtr &msg, bool is_be
 }
 
 void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
-  score_sub_mat = 150 - (score_sec_mat - score_best_mat);
+  int sub_mat_max = dynamic_reconfiguration::SUB_MAT_MAX;
+  score_sub_mat = sub_mat_max - (score_sec_mat - score_best_mat);
 
-  if (line_detection) {
+  if (dynamic_reconfiguration::LINE_DETECTION) {  // TODO: use line_detection instead
     score_line_mat = score_best_mat.clone();
     if (is_rotated) {
       lineDetection(score_line_mat, 2, 0);
@@ -130,7 +138,8 @@ void CameraPair::fusePair(const sensor_msgs::ImageConstPtr &msg) {
     else {
       lineDetection(score_line_mat, 0, 2);
     }
-    score_comb_mat = (score_sub_mat + 2*score_line_mat) / 2;
+    int line_det_weight = dynamic_reconfiguration::LINE_DET_WEIGHT;
+    score_comb_mat = (score_sub_mat + line_det_weight*score_line_mat) / 2;
   }
   else {
     score_comb_mat = score_sub_mat;

@@ -42,6 +42,12 @@
 
 namespace depth_map_fusion {
 
+namespace dynamic_reconfiguration {
+  // Evil globals set in depth_map_fusion_node
+  extern int X_OFFSET;
+  extern int Y_OFFSET;
+}
+
 CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
                              int id_,
                              bool hor_line_detection,
@@ -106,10 +112,9 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   int height = ver_pair.depth_best_mat.rows;
   int long_width  = hor_pair.depth_best_mat.cols;
   int short_width = ver_pair.depth_best_mat.cols;
-  // int i2 = i - 5;    // Alignment hack
-  // int j2 = j + 5 - ((long_width - short_width) / 2); // moves to the left
-  int i2 = i + 5;    // Alignment hack
-  int j2 = j + 13 - ((long_width - short_width) / 2); // moves to the left
+  int i2 = i + dynamic_reconfiguration::X_OFFSET;    // Alignment hack
+  int j2 = j + dynamic_reconfiguration::Y_OFFSET - ((long_width - short_width) / 2); // moves to the left
+
   // if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {
   //   return {hor_dist, hor_score};   // Pixel only exists on horizontal pair
   // }
