@@ -100,7 +100,7 @@ void CameraTriplet::fuseTriplet(const sensor_msgs::ImageConstPtr &msg) {
   int blur = 2 * (dynamic_reconfiguration::FINAL_BLUR / 2) + 1; // Must be odd
   cv::medianBlur(cropped_depth_combined, cropped_depth_combined, blur);
 
-  publishWithColorDebug(msg, cropped_depth_combined, fused_depth_color_pub, RAINBOW_WITH_BLACK);
+  publishWithColorDebug(msg, cropped_depth_combined, fused_depth_color_pub, RAINBOW_WITH_BLACK, 1);
   publishWithColor(msg, cropped_depth_combined, fused_depth_pub, GRAY_SCALE);
   publishWithColorDebug(msg, cropped_score_combined, fused_score_pub, GRAY_SCALE);
 }

@@ -52,8 +52,8 @@ namespace depth_map_fusion {
 namespace dynamic_reconfiguration {
 
   // Evil globals are defined and modified here to enable easy dynamic reconfiguration
-  bool DEBUG;
   bool LINE_DETECTION;
+  int DEBUG_LEVEL;
   int THRESHOLD;
   int TOO_CLOSE;
   int FINAL_BLUR;
@@ -64,8 +64,8 @@ namespace dynamic_reconfiguration {
   int Y_OFFSET;
 
   void callback(DepthMapFusionConfig & config, uint32_t level) {
-    DEBUG           = config.debug;
     LINE_DETECTION  = config.line_detection;
+    DEBUG_LEVEL     = config.debug_level;
     THRESHOLD       = config.threshold;
     TOO_CLOSE       = config.too_close;
     FINAL_BLUR      = config.final_blur;

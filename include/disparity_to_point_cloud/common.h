@@ -21,7 +21,7 @@ namespace depth_map_fusion {
 
 namespace dynamic_reconfiguration {
   // Evil global set in depth_map_fusion_node
-  extern bool DEBUG;
+  extern int DEBUG_LEVEL;
   extern int SCORE_MULT;
 }
 
@@ -198,9 +198,10 @@ void publishWithColorDebug(const sensor_msgs::ImageConstPtr &msg,
                            const cv::Mat &mat,
                            const ros::Publisher &publisher,
                            int colormap,
+                           int debug_level=0,
                            std::string encoding="mono8") {
 
-  if (dynamic_reconfiguration::DEBUG) {
+  if (debug_level >= dynamic_reconfiguration::DEBUG_LEVEL) {
     publishWithColor(msg, mat, publisher, colormap, encoding);
   }
 }
