@@ -52,10 +52,12 @@ namespace dynamic_reconfiguration {
 CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
                              int id_,
                              bool hor_line_detection,
-                             bool ver_line_detection)
+                             bool ver_line_detection,
+                             bool disable_vertical_pair)
 : 
+  disable_vertical(disable_vertical_pair),
   hor_pair(nh, this, std::to_string(id_),   false,  hor_line_detection),
-  ver_pair(nh, this, std::to_string(id_+20), true,   ver_line_detection)
+  ver_pair(nh, this, std::to_string(id_),   true,   ver_line_detection, disable_vertical_pair)
 {
   std::string id_str = std::to_string(id_);
 
@@ -68,10 +70,13 @@ CameraTriplet::CameraTriplet(ros::NodeHandle &nh,
 
 
 void CameraTriplet::fuseIfPossible(const sensor_msgs::ImageConstPtr &msg) {
-  if (hor_pair.timestamps[0] == hor_pair.timestamps[1] /* &&
-      hor_pair.timestamps[0] == ver_pair.timestamps[0] &&
-      hor_pair.timestamps[0] == ver_pair.timestamps[1]*/) {
-    fuseTriplet(msg);
+  if (hor_pair.timestamps[0] == hor_pair.timestamps[1])
+    // Horizontal cameras have the same timestamp
+    if (disable_vertical || (hor_pair.timestamps[0] == ver_pair.timestamps[0] && 
+                             hor_pair.timestamps[0] == ver_pair.timestamps[1])) {
+      
+      // Vertical cameras are either disabled or have the same timestamp as the horizontal
+      fuseTriplet(msg);
   }
 }
 
@@ -122,14 +127,22 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   DepthScore hor_best = {hor_dist, hor_score};
   DepthScore hor_sec = {hor_pair.depth_sec_mat.at<unsigned char>(i, j), 
                         hor_pair.score_sec_mat.at<unsigned char>(i, j)};
+  int hor_comb_score = hor_pair.score_comb_mat.at<unsigned char>(i, j);
+
+  if (hor_score > hor_sec.score) {
+    return {0, 255};  // Second best is better than the best, overflow?
+  }
+
+  if (disable_vertical) {
+    return filterHor(hor_best.depth, hor_comb_score, hor_sec.depth, hor_sec.score);
+  }
+
   DepthScore ver_best = {ver_pair.depth_best_mat.at<unsigned char>(i2, j2), 
                          ver_pair.score_best_mat.at<unsigned char>(i2, j2)};
   DepthScore ver_sec = {ver_pair.depth_sec_mat.at<unsigned char>(i2, j2), 
                         ver_pair.score_sec_mat.at<unsigned char>(i2, j2)};
+  int ver_comb_score = ver_pair.score_comb_mat.at<unsigned char>(i2, j2);
 
-  if (hor_score > hor_sec.score) {
-    return {0, 255};
-  }
   // return betterScore(hor_best, hor_sec, ver_best, ver_sec);
   // return lowerDepth(hor_best, hor_sec, ver_best, ver_sec);
   // return secondBestInv2(hor_best, hor_sec, ver_best, ver_sec);
@@ -137,8 +150,6 @@ DepthScore CameraTriplet::getFusedPixel(int i, int j) {
   // return alwaysVer(hor_best, hor_sec, ver_best, ver_sec);
   // return onlyGoodOnes(hor_best, hor_sec, ver_best, ver_sec);
 
-  int hor_comb_score = hor_pair.score_comb_mat.at<unsigned char>(i, j);
-  int ver_comb_score = ver_pair.score_comb_mat.at<unsigned char>(i2, j2);
   // return sobelFusion(hor_best.depth, hor_comb_score, ver_best.depth, ver_comb_score);
 
   if (j2 <= 0 || j2 >= short_width || i2 < 0 || i2 >= height) {

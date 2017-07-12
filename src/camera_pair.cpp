@@ -55,12 +55,16 @@ CameraPair::CameraPair(ros::NodeHandle &nh,
                        CameraTriplet *parent,
                        std::string id,
                        bool is_rotated,
-                       bool line_detection)
+                       bool line_detection,
+                       bool is_disabled)
 :
   parent(parent),
   is_rotated(is_rotated),
   line_detection(line_detection)
 {
+  if (is_disabled) {
+    return;
+  }
 
   // timestamps = std::vector<ros::Time>(2);
   timestamps = {ros::Time(), ros::Time()};

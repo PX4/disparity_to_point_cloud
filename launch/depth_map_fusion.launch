@@ -4,8 +4,9 @@
   <arg name="threshold" default="20" />  <!-- Max cost for a pixel in the final depth-map -->
   <arg name="hor_line_detection" default="false" />  <!-- Run horizontal line detection? -->
   <arg name="ver_line_detection" default="false" />  <!-- Run vertical line detection? -->
+  <arg name="disable_vertical" default="true" />  <!-- Disable the vertical camera-pair -->
   
-  <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion_$(arg base_id)" output="screen">
+  <node pkg="disparity_to_point_cloud" type="depth_map_fusion_node" name="depth_map_fusion_$(arg base_id)" output="screen" respawn="true">
     <remap to="/uvc_camera/cam_0/image_rect" from="/matching_score_1"/>
     <remap to="/uvc_camera/cam_0/image_depth" from="/disparity_1"/>
     <remap to="/uvc_camera/cam_2/image_rect" from="/matching_score_2"/>

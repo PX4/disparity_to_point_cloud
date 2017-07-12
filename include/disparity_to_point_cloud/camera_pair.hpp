@@ -72,7 +72,8 @@ class CameraPair {
              CameraTriplet *parent,
              std::string id,
              bool is_rotated=false,
-             bool line_detection=true);
+             bool line_detection=true,
+             bool is_disabled=false);
 
   // Normal callback, image contains depth and score 
   void bestCallback(const sensor_msgs::ImageConstPtr &msg);

@@ -92,15 +92,21 @@ int main(int argc, char *argv[]) {
   // Get other parameters
   int base_id;
   bool hor_line_detection, ver_line_detection;
+  bool disable_vertical = true;
+
   nh.param<int>("base_id", base_id, 0);
   nh.param<bool>("hor_line_detection", hor_line_detection, true);
   nh.param<bool>("ver_line_detection", ver_line_detection, true);
+
+  // TODO: why does this not work?
+  // nh.param<bool>("disable_vertical", disable_vertical, true); 
 
   // Create a Camera Triplet
   depth_map_fusion::CameraTriplet triplet(nh,
                                           base_id,
                                           hor_line_detection,
-                                          ver_line_detection);
+                                          ver_line_detection,
+                                          disable_vertical);
 
   // Endless loop
   ros::spin();

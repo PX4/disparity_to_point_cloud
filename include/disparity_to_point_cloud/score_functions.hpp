@@ -129,14 +129,19 @@ DepthScore sobelFusion(int hor_depth, int hor_score,
 }
 
 inline
-DepthScore filterHor(int hor_depth, int hor_score,
-                     int ver_depth, int ver_score) {
+DepthScore filterHor(int best_depth, int hor_score,
+                     int sec_depth,  int sec_score) {
   int thres = dynamic_reconfiguration::THRESHOLD;
   int tooClose = dynamic_reconfiguration::TOO_CLOSE;
 
-  if (hor_score < thres && hor_depth < tooClose && hor_depth!=0) {
-    return {hor_depth, hor_score};
-  } 
+  if (hor_score < thres && best_depth < tooClose && best_depth!=0) {
+    return {best_depth, hor_score};
+  }
+  if (std::abs(best_depth - sec_depth) < 2){
+    // The best and second-best dephts are almost the same,
+    // real depth is probably on the border of near- and far-field
+    return {best_depth, sec_score};
+  }
   return {0, 100};
 }
 

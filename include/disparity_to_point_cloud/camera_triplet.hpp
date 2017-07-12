@@ -51,7 +51,8 @@ class CameraTriplet {
   CameraTriplet(ros::NodeHandle &nh,
                 int id_,
                 bool hor_line_detection=true,
-                bool ver_line_detection=true);
+                bool ver_line_detection=true,
+                bool disable_vertical=true);
 
   // A pair received an image, if all images have that same timestamp, fuse them together
   void fuseIfPossible(const sensor_msgs::ImageConstPtr &msg);
@@ -63,6 +64,7 @@ class CameraTriplet {
   DepthScore getFusedPixel(int i, int j);
 
   int id;
+  bool disable_vertical;
   CameraPair hor_pair;
   CameraPair ver_pair;
   ros::Publisher fused_depth_pub;
